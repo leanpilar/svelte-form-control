@@ -68,9 +68,19 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 			let $pending = false;
 			if ($error != null && $error instanceof Promise) {
 				$pending = true;
+
+				set({
+					$error: null,
+					$valid,
+					$touched,
+					$dirty,
+					$pending,
+				} as ControlState<T>);
+
 				$error
 					.then((ret) => {
 						$valid = ret == null;
+						$pending = false;
 						set({
 							$error: ret,
 							$valid,
@@ -82,7 +92,9 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 					.catch((err) => {
 						$valid = false;
 						set({
-							$error: { email: true } as ValidationError<boolean>,
+							$error: {
+								serverError: true,
+							} as ValidationError<boolean>,
 							$valid,
 							$touched,
 							$dirty,
