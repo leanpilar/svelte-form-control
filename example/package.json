@@ -15,6 +15,6 @@
     "sirv-cli": "^1.0.0"
   },
   "alias": {
-    "@rbzl/svelte-form-control": "../../dist"
+    "@leanpilar/svelte-form-control": "../../dist"
   }
 }

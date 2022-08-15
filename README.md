@@ -1,4 +1,4 @@
-# @rbzl/svelte-form-control
+# @leanpilar/svelte-form-control
 
 Inspired by Angular's reactive forms but made it 'the Svelte way'.
 
