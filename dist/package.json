@@ -1,5 +1,5 @@
 {
-  "name": "@rbzl/svelte-form-control",
+  "name": "@leanpilar/svelte-form-control",
   "version": "0.2.0",
   "description": "Svelte form validation and state store library",
   "main": "index.js",
