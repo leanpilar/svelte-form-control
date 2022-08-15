@@ -7,7 +7,7 @@ Inspired by Angular's reactive forms but made it 'the Svelte way'.
 **Note**: the package is not yet published to NPM, install it from github directly
 
 ``` bash
-npm i github:ribizli/svelte-form-control#publish
+npm i -D github:leanpilar/svelte-form-control
 ```
 
 ## Example usage

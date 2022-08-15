@@ -11,9 +11,9 @@
     maxLength,
     min,
     max,
-  } from '@rbzl/svelte-form-control';
+  } from '@leanpilar/svelte-form-control';
 
-  import { ControlError } from '@rbzl/svelte-form-control/components';
+  import { ControlError } from '@leanpilar/svelte-form-control/components';
 
   const labelControl = initial => new Control(initial, [required]);
 

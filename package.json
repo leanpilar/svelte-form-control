@@ -1,5 +1,5 @@
 {
-  "name": "@rbzl/svelte-form-control",
+  "name": "@leanpilar/svelte-form-control",
   "description": "Svelte form validation and state store library",
   "scripts": {
     "build": "rollup -c",
