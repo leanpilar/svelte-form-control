@@ -372,17 +372,15 @@ export class ControlArray<T> extends ControlBase<T[]> {
 	state = derived(
 		[this.valueDerived, this.childStateDerived, this.validators, this.touched],
 		([value, childState, validators, touched]) => {
-			console.log('setup state');
 			const arrayState = {} as $ControlState & { list: $ControlState[] };
 			arrayState.list = [];
 			let childrenValid = true;
 			arrayState.$touched = touched;
 			for (let i = 0, len = childState.length; i < len; i++) {
-				console.log({i});
 				const state = childState[i];
 				arrayState.list[i] = state;
 				childrenValid = childrenValid && state.$valid;
-				arrayState.$touched = arrayState.$touched || state.$touched;
+				arrayState.$touched = arrayState.$touched || state.$touched || false;
 				arrayState.$dirty = arrayState.$dirty || state.$dirty;
 			}
 			arrayState.$error = validateIterated(validators, value);
