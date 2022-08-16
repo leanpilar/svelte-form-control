@@ -234,11 +234,11 @@ export class ControlGroup<T> extends ControlBase<T> {
 	};
 
 	state = derived(
-		[this.valueDerived, this.childStateDerived, this.validators],
-		([value, childState, validators]) => {
+		[this.valueDerived, this.childStateDerived, this.validators, this.touched],
+		([value, childState, validators, touched]) => {
 			const children: Record<string, $ControlState> = {};
 			let childrenValid = true;
-			let $touched = get(this.touched);
+			let $touched = touched;
 			let $dirty = false;
 			let $pending = false;
 			let $meta = get(this.meta);
@@ -370,13 +370,12 @@ export class ControlArray<T> extends ControlBase<T[]> {
 	};
 
 	state = derived(
-		[this.valueDerived, this.childStateDerived, this.validators],
-		([value, childState, validators]) => {
+		[this.valueDerived, this.childStateDerived, this.validators, this.touched],
+		([value, childState, validators, touched]) => {
 			const arrayState = {} as $ControlState & { list: $ControlState[] };
 			arrayState.list = [];
 			let childrenValid = true;
-			arrayState.$touched = get(this.touched);
-			console.log(arrayState.$touched);
+			arrayState.$touched = touched;
 			for (let i = 0, len = childState.length; i < len; i++) {
 				const state = childState[i];
 				arrayState.list[i] = state;
@@ -384,7 +383,6 @@ export class ControlArray<T> extends ControlBase<T[]> {
 				arrayState.$touched = arrayState.$touched || state.$touched;
 				arrayState.$dirty = arrayState.$dirty || state.$dirty;
 			}
-			console.log(arrayState.$touched);
 			arrayState.$error = validateIterated(validators, value);
 			arrayState.$valid = arrayState.$error == null && childrenValid;
 			arrayState.$meta = get(this.meta);

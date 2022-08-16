@@ -141,10 +141,10 @@ class ControlGroup extends ControlBase {
             set: (value) => this.setValue(value),
             update: (updater) => this.setValue(updater(store.get(this.valueDerived))),
         };
-        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators], ([value, childState, validators]) => {
+        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched], ([value, childState, validators, touched]) => {
             const children = {};
             let childrenValid = true;
-            let $touched = store.get(this.touched);
+            let $touched = touched;
             let $dirty = false;
             let $pending = false;
             let $meta = store.get(this.meta);
@@ -233,12 +233,11 @@ class ControlArray extends ControlBase {
             set: (value) => this.setValue(value),
             update: (updater) => this.setValue(updater(store.get(this.valueDerived))),
         };
-        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators], ([value, childState, validators]) => {
+        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched], ([value, childState, validators, touched]) => {
             const arrayState = {};
             arrayState.list = [];
             let childrenValid = true;
-            arrayState.$touched = store.get(this.touched);
-            console.log(arrayState.$touched);
+            arrayState.$touched = touched;
             for (let i = 0, len = childState.length; i < len; i++) {
                 const state = childState[i];
                 arrayState.list[i] = state;
@@ -246,7 +245,6 @@ class ControlArray extends ControlBase {
                 arrayState.$touched = arrayState.$touched || state.$touched;
                 arrayState.$dirty = arrayState.$dirty || state.$dirty;
             }
-            console.log(arrayState.$touched);
             arrayState.$error = validateIterated(validators, value);
             arrayState.$valid = arrayState.$error == null && childrenValid;
             arrayState.$meta = store.get(this.meta);
