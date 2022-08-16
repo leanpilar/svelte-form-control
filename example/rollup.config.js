@@ -7,7 +7,7 @@ import css from 'rollup-plugin-css-only';
 
 const packageJson = require('./package.json');
 
-const production = !process.env.ROLLUP_WATCH;
+const production = false;
 
 function serve() {
 	let server;

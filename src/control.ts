@@ -5,6 +5,18 @@ import { ValidationError, ValidatorFn } from "./validators";
 type GroupValue<T> = { [K in keyof T]: T[K] };
 
 type ControlTypes = string | number | boolean;
+export interface FormControlMeta{
+	name?: string;
+	helperText?: any;
+	placeholder?: string,
+	visible?: boolean;
+	translate?: boolean,
+	selectValues?: any[]
+	language_dependent?: boolean,
+	type?: string;
+	errorMessages?: {[key: string]: string | (() => string)};
+	emptyControl?: any
+}
 
 export interface $ControlState {
 	$error: ValidationError | null;
@@ -16,6 +28,12 @@ export interface $ControlState {
 	$dirty: boolean;
 
 	$pending: boolean;
+
+	$meta: FormControlMeta;
+
+	$type: 'control' | 'group' | 'array';
+
+	$label: string,
 }
 
 type ControlState<T = any> = T extends (infer K)[]
@@ -29,10 +47,19 @@ type ControlState<T = any> = T extends (infer K)[]
 export abstract class ControlBase<T = any> {
 	public validators: Writable<ValidatorFn<T>[]>;
 
-	constructor(validators: ValidatorFn<T>[]) {
-		this.validators = writable(validators);
-	}
+	protected meta: Writable<FormControlMeta>;
 
+	protected label: string
+
+	constructor(
+		validators: ValidatorFn<T>[],
+		meta?: FormControlMeta
+) {
+		this.validators = writable(validators);
+		this.meta = writable(meta ?? {});
+		this.label = meta?.name ?? '';
+	}
+	
 	abstract value: Writable<T>;
 
 	abstract state: Readable<ControlState<T>>;
@@ -51,7 +78,6 @@ export abstract class ControlBase<T = any> {
 
 export class Control<T = ControlTypes> extends ControlBase<T> {
 	value = writable<T>(this.initial);
-
 	private touched = writable(false);
 
 	state = derived<
@@ -66,6 +92,8 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 
 			let $valid = true;
 			let $pending = false;
+			let $meta = get(this.meta)
+			let $type = 'control';
 			if ($error != null && $error instanceof Promise) {
 				$pending = true;
 
@@ -75,6 +103,8 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 					$touched,
 					$dirty,
 					$pending,
+					$meta,
+					$type
 				} as ControlState<T>);
 
 				$error
@@ -87,6 +117,8 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 							$touched,
 							$dirty,
 							$pending,
+							$meta,
+							$type
 						} as ControlState<T>);
 					})
 					.catch((err) => {
@@ -99,6 +131,8 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 							$touched,
 							$dirty,
 							$pending,
+							$meta,
+							$type
 						} as ControlState<T>);
 					});
 			} else {
@@ -110,13 +144,19 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 					$touched,
 					$dirty,
 					$pending,
+					$meta,
+					$type
 				} as ControlState<T>);
 			}
 		}
 	);
 
-	constructor(private initial: T, validators: ValidatorFn<T>[] = []) {
-		super(validators);
+	constructor(
+		private initial: T,
+		validators: ValidatorFn<T>[] = [],
+		meta?: FormControlMeta
+	) {
+		super(validators, meta);
 	}
 
 	setTouched(touched: boolean) {
@@ -126,6 +166,7 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 	child() {
 		return null!;
 	}
+
 
 	reset(value?: T) {
 		if (value !== undefined) this.initial = value;
@@ -197,6 +238,8 @@ export class ControlGroup<T> extends ControlBase<T> {
 			let $touched = false;
 			let $dirty = false;
 			let $pending = false;
+			let $meta = get(this.meta);
+			let $type = 'group';
 			for (const key of Object.keys(childState)) {
 				const state = (children[key] = (childState as any)[
 					key
@@ -214,13 +257,19 @@ export class ControlGroup<T> extends ControlBase<T> {
 				$touched,
 				$dirty,
 				$pending,
+				$meta,
+				$type,
 				...children,
 			} as ControlState<T>;
 		}
 	);
 
-	constructor(controls: Controls<T>, validators: ValidatorFn<T>[] = []) {
-		super(validators);
+	constructor(
+		controls: Controls<T>, 
+		validators: ValidatorFn<T>[] = [],
+		meta: FormControlMeta
+	) {
+		super(validators, meta);
 		this.controlStore.set(controls);
 	}
 
@@ -233,9 +282,13 @@ export class ControlGroup<T> extends ControlBase<T> {
 
 	private setValue(value: T) {
 		this.iterateControls(([key, control]) => {
-			const controlValue = (value && value[key]) || null;
+			const controlValue = (value && value[key]) ?? null;
 			control.value.set(controlValue!);
 		});
+	}
+	private patchValue(value: T) {
+		const currentValue = get(this.valueDerived);
+		this.setValue({...currentValue, ...value});
 	}
 
 	addControl(key: string, control: ControlBase) {
@@ -325,6 +378,8 @@ export class ControlArray<T> extends ControlBase<T[]> {
 			}
 			arrayState.$error = validateIterated(validators, value);
 			arrayState.$valid = arrayState.$error == null && childrenValid;
+			arrayState.$meta = get(this.meta);
+			arrayState.$type = 'array';
 
 			return arrayState as ControlState<T[]>;
 		}
@@ -332,9 +387,10 @@ export class ControlArray<T> extends ControlBase<T[]> {
 
 	constructor(
 		private readonly _controls: ControlBase<T>[],
-		validators: ValidatorFn<T[]>[] = []
+		validators: ValidatorFn<T[]>[] = [],
+		meta?: FormControlMeta
 	) {
-		super(validators);
+		super(validators, meta);
 	}
 
 	private iterateControls(

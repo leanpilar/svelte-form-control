@@ -4,7 +4,7 @@ import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 
-const production = false;//!process.env.ROLLUP_WATCH;
+const production = false; //!process.env.ROLLUP_WATCH;
 
 export default {
   input: 'src/index.ts',

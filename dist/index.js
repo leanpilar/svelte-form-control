@@ -23,8 +23,11 @@ const validateIterated = (validators, fieldValue) => {
 };
 
 class ControlBase {
-    constructor(validators) {
+    constructor(validators, meta) {
+        var _a;
         this.validators = store.writable(validators);
+        this.meta = store.writable(meta !== null && meta !== void 0 ? meta : {});
+        this.label = (_a = meta === null || meta === void 0 ? void 0 : meta.name) !== null && _a !== void 0 ? _a : '';
     }
     setValidators(validators) {
         if (!(Array.isArray(validators) && validators.length))
@@ -33,8 +36,8 @@ class ControlBase {
     }
 }
 class Control extends ControlBase {
-    constructor(initial, validators = []) {
-        super(validators);
+    constructor(initial, validators = [], meta) {
+        super(validators, meta);
         this.initial = initial;
         this.value = store.writable(this.initial);
         this.touched = store.writable(false);
@@ -43,6 +46,8 @@ class Control extends ControlBase {
             const $error = validateIterated(validators, value);
             let $valid = true;
             let $pending = false;
+            let $meta = store.get(this.meta);
+            let $type = 'control';
             if ($error != null && $error instanceof Promise) {
                 $pending = true;
                 set({
@@ -51,6 +56,8 @@ class Control extends ControlBase {
                     $touched,
                     $dirty,
                     $pending,
+                    $meta,
+                    $type
                 });
                 $error
                     .then((ret) => {
@@ -62,6 +69,8 @@ class Control extends ControlBase {
                         $touched,
                         $dirty,
                         $pending,
+                        $meta,
+                        $type
                     });
                 })
                     .catch((err) => {
@@ -74,6 +83,8 @@ class Control extends ControlBase {
                         $touched,
                         $dirty,
                         $pending,
+                        $meta,
+                        $type
                     });
                 });
             }
@@ -85,6 +96,8 @@ class Control extends ControlBase {
                     $touched,
                     $dirty,
                     $pending,
+                    $meta,
+                    $type
                 });
             }
         });
@@ -104,8 +117,8 @@ class Control extends ControlBase {
 }
 const objectPath = /^([^.[]+)\.?(.*)$/;
 class ControlGroup extends ControlBase {
-    constructor(controls, validators = []) {
-        super(validators);
+    constructor(controls, validators = [], meta) {
+        super(validators, meta);
         this.controlStore = store.writable({});
         this.controls = {
             subscribe: this.controlStore.subscribe,
@@ -133,6 +146,8 @@ class ControlGroup extends ControlBase {
             let $touched = false;
             let $dirty = false;
             let $pending = false;
+            let $meta = store.get(this.meta);
+            let $type = 'group';
             for (const key of Object.keys(childState)) {
                 const state = (children[key] = childState[key]);
                 childrenValid = childrenValid && state.$valid;
@@ -146,7 +161,9 @@ class ControlGroup extends ControlBase {
                 $valid,
                 $touched,
                 $dirty,
-                $pending }, children);
+                $pending,
+                $meta,
+                $type }, children);
         });
         this.controlStore.set(controls);
     }
@@ -156,9 +173,14 @@ class ControlGroup extends ControlBase {
     }
     setValue(value) {
         this.iterateControls(([key, control]) => {
-            const controlValue = (value && value[key]) || null;
+            var _a;
+            const controlValue = (_a = (value && value[key])) !== null && _a !== void 0 ? _a : null;
             control.value.set(controlValue);
         });
+    }
+    patchValue(value) {
+        const currentValue = store.get(this.valueDerived);
+        this.setValue(Object.assign(Object.assign({}, currentValue), value));
     }
     addControl(key, control) {
         this.controlStore.update((controls) => ((controls[key] = control), controls));
@@ -188,8 +210,8 @@ class ControlGroup extends ControlBase {
 }
 const arrayPath = /^\[(\d+)\]\.?(.*)$/;
 class ControlArray extends ControlBase {
-    constructor(_controls, validators = []) {
-        super(validators);
+    constructor(_controls, validators = [], meta) {
+        super(validators, meta);
         this._controls = _controls;
         this.controlStore = store.writable(this._controls);
         this.controls = {
@@ -221,6 +243,8 @@ class ControlArray extends ControlBase {
             }
             arrayState.$error = validateIterated(validators, value);
             arrayState.$valid = arrayState.$error == null && childrenValid;
+            arrayState.$meta = store.get(this.meta);
+            arrayState.$type = 'array';
             return arrayState;
         });
     }

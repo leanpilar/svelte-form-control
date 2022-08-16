@@ -1,4 +1,6 @@
-<script context="module">
+
+<script lang="ts">
+
   export const defaultErrorMessages = {
     required: 'required',
     email: 'invalid email',
@@ -11,16 +13,18 @@
     max: max => `greater then ${max}`,
     pattern: pattern => `pattern ${pattern}`,
   };
-</script>
-<script>
   export let control;
   let classes = 'control-error';
   export { classes as class };
   export let messages = {};
 
-  $: mergedMessages = messages ? {...defaultErrorMessages, ...messages} : {};
+  const meta = control.meta
+  const customErrorMessages = $meta.errorMessages ?? {}
+  $: mergedMessages = messages ? {...defaultErrorMessages, ...customErrorMessages, ...messages} : {};
+
 
   const state = control.state;
+
 
   let error, value;
   let message;

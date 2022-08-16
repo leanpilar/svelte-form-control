@@ -4,12 +4,29 @@ declare type GroupValue<T> = {
     [K in keyof T]: T[K];
 };
 declare type ControlTypes = string | number | boolean;
+export interface FormControlMeta {
+    name?: string;
+    helperText?: any;
+    placeholder?: string;
+    visible?: boolean;
+    translate?: boolean;
+    selectValues?: any[];
+    language_dependent?: boolean;
+    type?: string;
+    errorMessages?: {
+        [key: string]: string | (() => string);
+    };
+    emptyControl?: any;
+}
 export interface $ControlState {
     $error: ValidationError | null;
     $valid: boolean;
     $touched: boolean;
     $dirty: boolean;
     $pending: boolean;
+    $meta: FormControlMeta;
+    $type: 'control' | 'group' | 'array';
+    $label: string;
 }
 declare type ControlState<T = any> = T extends (infer K)[] ? $ControlState & {
     list: Array<ControlState<K>>;
@@ -18,7 +35,9 @@ declare type ControlState<T = any> = T extends (infer K)[] ? $ControlState & {
 } : $ControlState;
 export declare abstract class ControlBase<T = any> {
     validators: Writable<ValidatorFn<T>[]>;
-    constructor(validators: ValidatorFn<T>[]);
+    protected meta: Writable<FormControlMeta>;
+    protected label: string;
+    constructor(validators: ValidatorFn<T>[], meta?: FormControlMeta);
     abstract value: Writable<T>;
     abstract state: Readable<ControlState<T>>;
     abstract child(path: string): ControlBase;
@@ -31,7 +50,7 @@ export declare class Control<T = ControlTypes> extends ControlBase<T> {
     value: Writable<T>;
     private touched;
     state: Readable<ControlState<T>>;
-    constructor(initial: T, validators?: ValidatorFn<T>[]);
+    constructor(initial: T, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     setTouched(touched: boolean): void;
     child(): never;
     reset(value?: T): void;
@@ -46,9 +65,10 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private childStateDerived;
     value: Writable<T>;
     state: Readable<ControlState<T>>;
-    constructor(controls: Controls<T>, validators?: ValidatorFn<T>[]);
+    constructor(controls: Controls<T>, validators: ValidatorFn<T, any>[] | undefined, meta: FormControlMeta);
     private iterateControls;
     private setValue;
+    private patchValue;
     addControl(key: string, control: ControlBase): void;
     removeControl(key: string): void;
     setTouched(touched: boolean): void;
@@ -65,7 +85,7 @@ export declare class ControlArray<T> extends ControlBase<T[]> {
     state: Readable<$ControlState & {
         list: ControlState<T>[];
     }>;
-    constructor(_controls: ControlBase<T>[], validators?: ValidatorFn<T[]>[]);
+    constructor(_controls: ControlBase<T>[], validators?: ValidatorFn<T[]>[], meta?: FormControlMeta);
     private iterateControls;
     private setValue;
     setTouched(touched: boolean): void;

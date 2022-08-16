@@ -13,9 +13,16 @@
     max,
   } from '@leanpilar/svelte-form-control';
 
-  import { ControlError } from '@leanpilar/svelte-form-control/components';
+  import { ControlError, CustomControl } from '@leanpilar/svelte-form-control/components';
 
-  const labelControl = initial => new Control(initial, [required]);
+  const labelControl = () => new ControlGroup({
+    label_name: new Control('', [
+      required,
+    ], {name: 'Label Name'}),
+    label_type: new Control('default', [
+      required,
+    ], {name: 'Label Type'}),
+  })
 
   const ageControl = new Control(12, [
     required,
@@ -25,12 +32,17 @@
   ]);
 
   const form = new ControlGroup({
-    name: new Control('test', [
+    name: new Control('', [
       required,
       minLength(4),
       maxLength(10),
       name => name === 'test' ? null : { expected: 'test' },
-    ]),
+    ], {
+      placeholder: 'custom placeholder',
+      errorMessages: {
+        required: 'Name is required'
+      }
+    }),
     email: new Control('test@inbox.com', [
       required,
       email
@@ -39,21 +51,29 @@
       line: new Control('line', [
         required,
       ]),
-      city: new Control('ciry', [
+      city: new Control('city', [
         required,
       ]),
-      zip: new Control(11111, [
+      zip: new Control('1111e', [
         required,
         integer,
         minLength(5),
         maxLength(5),
 
-      ]),
-    }),
+      ],{
+        errorMessages: {
+          required: 'Zip is required',
+          integer: 'Zip must be a number',
+        }
+      }),
+    }, [], {placeholder: 'address'}),
     labels: new ControlArray([
-      labelControl('label1'),
-      labelControl('label2'),
-    ]),
+      labelControl(),
+      labelControl(),
+    ], [], {
+      placeholder: 'labels',
+      emptyControl: labelControl
+    }),
   },
     [
       (value) => {
@@ -61,7 +81,9 @@
           value.name && value.email && value.email.substr(0, value.email.indexOf('@')) === value.name;
         return valid ? null : { custom: `email username part should be the same as name` };
       }
-    ]);
+    ],{
+      placeholder: 'form group'
+    });
 
   const value = form.value;
   const state = form.state;
@@ -84,6 +106,7 @@
 
   $: json = JSON.stringify($value, undefined, 2);
   $: stateJson = JSON.stringify($state, undefined, 2);
+  //let maneMeta = form.child('name').meta
 </script>
 
 <style>
@@ -99,6 +122,7 @@ fieldset {
 
 <h1>Svelte form control example</h1>
 
+
 <div>
   Form is {$state.$valid ? 'valid' : 'invalid'}
   <ControlError control={form}/>
@@ -106,12 +130,15 @@ fieldset {
 <div>Values are {$state.$dirty ? 'dirty' : 'pristine'}</div>
 <div>Fields are {$state.$touched ? 'touched' : 'untouched'}</div>
 
+<CustomControl control="{form}" />
+<hr>
 <label>
   <span class="label">name:</span>
-  <input bind:value={$value.name} use:controlClasses={form.child('name')} />
+  <input placeholder="{$state?.name?.$meta?.placeholder}" bind:value={$value.name} use:controlClasses={form.child('name')} />
   <ControlError control={form.child('name')}/>
 </label>
 
+<!--<CustomControl control="{form.child('email')}" />-->
 <label>
   <span class="label">email:</span>
   <input bind:value={$value.email} use:controlClasses={form.child('email')} />
@@ -141,20 +168,20 @@ fieldset {
 
   <label>
     <span class="label">zip:</span>
-    <input type="number" bind:value={$value.address.zip} use:controlClasses={form.child('address.zip')} />
-    <ControlError control={form.child('address.zip')}/>
+    <input  bind:value={$value.address.zip} use:controlClasses={form.child('address.zip')} />
+    <ControlError messages="{{integer: 'custom invalid integer message'}}" control={form.child('address.zip')}/>
   </label>
 </fieldset>
 
 <fieldset>
   <legend>labels</legend>
-  {#each $labels as label, index (label)}
+<!--  {#each $labels as label, index (label)}
     <div class="">
       <input bind:value={$value.labels[index]} use:controlClasses={label} />
       <button on:click={removeLabel(label)}>- remove</button>
       <ControlError control={label}/>
     </div>
-  {/each}
+  {/each}-->
   <div>
     <button on:click={addLabel}>+ add</button>
   </div>
