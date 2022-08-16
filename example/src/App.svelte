@@ -68,8 +68,8 @@
       }),
     }, [], {placeholder: 'address'}),
     labels: new ControlArray([
-      labelControl(),
-      labelControl(),
+   /*   labelControl(),
+      labelControl(),*/
     ], [], {
       placeholder: 'labels',
       emptyControl: labelControl
