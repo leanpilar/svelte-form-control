@@ -234,6 +234,7 @@ class ControlArray extends ControlBase {
             arrayState.list = [];
             let childrenValid = true;
             arrayState.$touched = get(this.touched);
+            console.log(arrayState.$touched);
             for (let i = 0, len = childState.length; i < len; i++) {
                 const state = childState[i];
                 arrayState.list[i] = state;
@@ -241,6 +242,7 @@ class ControlArray extends ControlBase {
                 arrayState.$touched = arrayState.$touched || state.$touched;
                 arrayState.$dirty = arrayState.$dirty || state.$dirty;
             }
+            console.log(arrayState.$touched);
             arrayState.$error = validateIterated(validators, value);
             arrayState.$valid = arrayState.$error == null && childrenValid;
             arrayState.$meta = get(this.meta);

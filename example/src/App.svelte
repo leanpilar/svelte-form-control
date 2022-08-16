@@ -131,6 +131,7 @@ fieldset {
 <div>Fields are {$state.$touched ? 'touched' : 'untouched'}</div>
 
 <CustomControl control="{form}" />
+<button on:click="{() => form.setTouched(true)}"> touch</button>
 <hr>
 <label>
   <span class="label">name:</span>

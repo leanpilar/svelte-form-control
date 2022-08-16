@@ -2,7 +2,6 @@
 <script lang="ts">
 
 
-  import {defaultErrorMessages} from "./defaultErrorMessages";
 
   export let control;
   let classes = 'control-error';
@@ -11,7 +10,7 @@
 
   const meta = control.meta
   const customErrorMessages = $meta.errorMessages ?? {}
-  $: mergedMessages = messages ? {...defaultErrorMessages, ...customErrorMessages, ...messages} : {};
+  $: mergedMessages = messages ? { ...customErrorMessages, ...messages} : {};
 
 
   const state = control.state;

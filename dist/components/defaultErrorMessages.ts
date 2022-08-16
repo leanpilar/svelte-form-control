@@ -10,3 +10,4 @@ export const defaultErrorMessages = {
   max: max => `greater then ${max}`,
   pattern: pattern => `pattern ${pattern}`,
 };
+
