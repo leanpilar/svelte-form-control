@@ -17,6 +17,7 @@ export interface FormControlMeta {
         [key: string]: string | (() => string);
     };
     emptyControl?: any;
+    [key: string]: any;
 }
 export interface $ControlState {
     $error: ValidationError | null;
@@ -62,6 +63,7 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private controlStore;
     controls: Readable<Controls<T>>;
     private valueDerived;
+    private touched;
     private childStateDerived;
     value: Writable<T>;
     state: Readable<ControlState<T>>;
@@ -78,6 +80,7 @@ export declare class ControlGroup<T> extends ControlBase<T> {
 export declare class ControlArray<T> extends ControlBase<T[]> {
     private readonly _controls;
     private controlStore;
+    private touched;
     controls: Readable<ControlBase<T>[]>;
     private valueDerived;
     private childStateDerived;

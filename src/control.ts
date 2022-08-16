@@ -16,6 +16,7 @@ export interface FormControlMeta{
 	type?: string;
 	errorMessages?: {[key: string]: string | (() => string)};
 	emptyControl?: any
+	[key: string]: any;
 }
 
 export interface $ControlState {
@@ -205,6 +206,8 @@ export class ControlGroup<T> extends ControlBase<T> {
 		}
 	);
 
+	private touched = writable(false);
+
 	private childStateDerived = derived(
 		this.controlStore,
 		(controls: Controls<T>, set: (value: ControlsState<T>) => void) => {
@@ -235,7 +238,7 @@ export class ControlGroup<T> extends ControlBase<T> {
 		([value, childState, validators]) => {
 			const children: Record<string, $ControlState> = {};
 			let childrenValid = true;
-			let $touched = false;
+			let $touched = get(this.touched);
 			let $dirty = false;
 			let $pending = false;
 			let $meta = get(this.meta);
@@ -307,6 +310,7 @@ export class ControlGroup<T> extends ControlBase<T> {
 		this.iterateControls(([_, control]) => {
 			control.setTouched(touched);
 		});
+		this.touched.set(touched);
 	}
 
 	child(path: string) {
@@ -330,6 +334,8 @@ const arrayPath = /^\[(\d+)\]\.?(.*)$/;
 
 export class ControlArray<T> extends ControlBase<T[]> {
 	private controlStore = writable(this._controls);
+
+	private touched = writable(false);
 
 	controls: Readable<ControlBase<T>[]> = {
 		subscribe: this.controlStore.subscribe,
@@ -369,6 +375,7 @@ export class ControlArray<T> extends ControlBase<T[]> {
 			const arrayState = {} as $ControlState & { list: $ControlState[] };
 			arrayState.list = [];
 			let childrenValid = true;
+			arrayState.$touched = get(this.touched);
 			for (let i = 0, len = childState.length; i < len; i++) {
 				const state = childState[i];
 				arrayState.list[i] = state;
@@ -409,6 +416,7 @@ export class ControlArray<T> extends ControlBase<T[]> {
 
 	setTouched(touched: boolean) {
 		this.iterateControls((control) => control.setTouched(touched));
+		this.touched.set(touched);
 	}
 
 	pushControl(control: ControlBase<T>) {
