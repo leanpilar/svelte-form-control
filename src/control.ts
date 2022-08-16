@@ -267,7 +267,7 @@ export class ControlGroup<T> extends ControlBase<T> {
 	constructor(
 		controls: Controls<T>, 
 		validators: ValidatorFn<T>[] = [],
-		meta: FormControlMeta
+		meta?: FormControlMeta
 	) {
 		super(validators, meta);
 		this.controlStore.set(controls);

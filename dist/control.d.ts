@@ -65,7 +65,7 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private childStateDerived;
     value: Writable<T>;
     state: Readable<ControlState<T>>;
-    constructor(controls: Controls<T>, validators: ValidatorFn<T, any>[] | undefined, meta: FormControlMeta);
+    constructor(controls: Controls<T>, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     private iterateControls;
     private setValue;
     private patchValue;
