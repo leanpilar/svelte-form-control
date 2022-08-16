@@ -41,12 +41,12 @@ class Control extends ControlBase {
         this.initial = initial;
         this.value = store.writable(this.initial);
         this.touched = store.writable(false);
-        this.state = store.derived([this.value, this.touched, this.validators], ([value, $touched, validators], set) => {
+        this.state = store.derived([this.value, this.touched, this.validators, this.meta], ([value, $touched, validators, meta], set) => {
             const $dirty = this.initial !== value;
             const $error = validateIterated(validators, value);
             let $valid = true;
             let $pending = false;
-            let $meta = store.get(this.meta);
+            let $meta = meta;
             let $type = 'control';
             if ($error != null && $error instanceof Promise) {
                 $pending = true;
@@ -141,13 +141,13 @@ class ControlGroup extends ControlBase {
             set: (value) => this.setValue(value),
             update: (updater) => this.setValue(updater(store.get(this.valueDerived))),
         };
-        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched], ([value, childState, validators, touched]) => {
+        this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta], ([value, childState, validators, touched, meta]) => {
             const children = {};
             let childrenValid = true;
             let $touched = touched;
             let $dirty = false;
             let $pending = false;
-            let $meta = store.get(this.meta);
+            let $meta = meta;
             let $type = 'group';
             for (const key of Object.keys(childState)) {
                 const state = (children[key] = childState[key]);
@@ -265,9 +265,8 @@ class ControlArray extends ControlBase {
         });
     }
     setTouched(touched) {
-        this.iterateControls((control) => control.setTouched(touched));
         this.touched.set(touched);
-        console.log('setTouched');
+        this.iterateControls((control) => control.setTouched(touched));
     }
     pushControl(control) {
         this.controlStore.update((controls) => (controls.push(control), controls));

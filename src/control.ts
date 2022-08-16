@@ -82,18 +82,18 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 	private touched = writable(false);
 
 	state = derived<
-		[Writable<T>, Writable<boolean>, Writable<ValidatorFn<T>[]>],
+		[Writable<T>, Writable<boolean>, Writable<ValidatorFn<T>[]>, Writable<FormControlMeta>],
 		ControlState<T>
 	>(
-		[this.value, this.touched, this.validators],
-		([value, $touched, validators], set) => {
+		[this.value, this.touched, this.validators,this.meta],
+		([value, $touched, validators, meta], set) => {
 			const $dirty = this.initial !== value;
 
 			const $error = validateIterated(validators, value);
 
 			let $valid = true;
 			let $pending = false;
-			let $meta = get(this.meta)
+			let $meta = meta;
 			let $type = 'control';
 			if ($error != null && $error instanceof Promise) {
 				$pending = true;
@@ -234,14 +234,14 @@ export class ControlGroup<T> extends ControlBase<T> {
 	};
 
 	state = derived(
-		[this.valueDerived, this.childStateDerived, this.validators, this.touched],
-		([value, childState, validators, touched]) => {
+		[this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta],
+		([value, childState, validators, touched, meta]) => {
 			const children: Record<string, $ControlState> = {};
 			let childrenValid = true;
 			let $touched = touched;
 			let $dirty = false;
 			let $pending = false;
-			let $meta = get(this.meta);
+			let $meta = meta;
 			let $type = 'group';
 			for (const key of Object.keys(childState)) {
 				const state = (children[key] = (childState as any)[
@@ -417,9 +417,8 @@ export class ControlArray<T> extends ControlBase<T[]> {
 	}
 
 	setTouched(touched: boolean) {
-		this.iterateControls((control) => control.setTouched(touched));
 		this.touched.set(touched);
-		console.log('setTouched');
+		this.iterateControls((control) => control.setTouched(touched));
 	}
 
 	pushControl(control: ControlBase<T>) {
