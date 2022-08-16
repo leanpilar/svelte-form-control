@@ -1,18 +1,9 @@
 
 <script lang="ts">
 
-  export const defaultErrorMessages = {
-    required: 'required',
-    email: 'invalid email',
-    minLength: min => `min length ${min}`,
-    maxLength: max => `max length ${max}`,
-    number: 'invalid number',
-    decimal: 'invalid decimal',
-    integer: 'invalid integer',
-    min: min => `less then ${min}`,
-    max: max => `greater then ${max}`,
-    pattern: pattern => `pattern ${pattern}`,
-  };
+
+  import {defaultErrorMessages} from "./defaultErrorMessages";
+
   export let control;
   let classes = 'control-error';
   export { classes as class };
