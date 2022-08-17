@@ -285,6 +285,29 @@ export class ControlGroup<T> extends ControlBase<T> {
 		this.setValue({...currentValue, ...value});
 	}
 
+	setControls(controls: Controls<T>) {
+		this.controlStore.set(controls);
+	}
+	patchControls(controls: Partial<Controls<T>>) {
+		const currentControls = get(this.controlStore);
+		this.setControls({...currentControls, ...controls});
+	}
+	addControls(list: {key: string, control: ControlBase}[],options?:ControlEventOptions ) {
+		if (options && options.propagateChanges === false) {
+			this.propagateChanges = false;
+		}
+
+		this.controlStore.update(
+			(controls) => {
+					list.forEach(({key, control}) => {
+						(<any>controls)[key] = control;
+					})
+					return controls
+				}
+		);
+
+		this.propagateChanges = true;
+	}
 	addControl(key: string, control: ControlBase,options?:ControlEventOptions) {
 		if (options && options.propagateChanges === false) {
 			this.propagateChanges = false;

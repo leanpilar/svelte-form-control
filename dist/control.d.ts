@@ -43,6 +43,12 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private iterateControls;
     setValue(value: T): void;
     patchValue(value: Partial<T>): void;
+    setControls(controls: Controls<T>): void;
+    patchControls(controls: Partial<Controls<T>>): void;
+    addControls(list: {
+        key: string;
+        control: ControlBase;
+    }[], options?: ControlEventOptions): void;
     addControl(key: string, control: ControlBase, options?: ControlEventOptions): void;
     removeControl(key: string, options?: ControlEventOptions): void;
     setTouched(touched: boolean): void;
