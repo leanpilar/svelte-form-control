@@ -1,10 +1,12 @@
 import { Readable, Writable } from "svelte/store";
 import { ValidatorFn } from "./validators";
-import { $ControlState, ControlBaseInterface, ControlState, ControlTypes, ControlValidators, FormControlMeta } from "./interfaces";
+import { $ControlState, ControlBaseInterface, ControlEventOptions, ControlState, ControlTypes, ControlValidators, FormControlMeta } from "./interfaces";
 export declare abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
     validators: Writable<ControlValidators<T>>;
     meta: Writable<FormControlMeta>;
     id: string;
+    currentState: ControlState<T> | null;
+    propagateChanges: boolean;
     label: string;
     constructor(validators: ValidatorFn<T>[], meta?: FormControlMeta);
     abstract value: Writable<T>;
@@ -41,8 +43,8 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private iterateControls;
     setValue(value: T): void;
     patchValue(value: Partial<T>): void;
-    addControl(key: string, control: ControlBase): void;
-    removeControl(key: string): void;
+    addControl(key: string, control: ControlBase, options?: ControlEventOptions): void;
+    removeControl(key: string, options?: ControlEventOptions): void;
     setTouched(touched: boolean): void;
     child(path: string): ControlBaseInterface<T> | null;
     reset(value?: Partial<T>): void;
@@ -61,7 +63,7 @@ export declare class ControlArray<T> extends ControlBase<T[]> {
     constructor(_controls: ControlBaseInterface<T>[], validators?: ValidatorFn<T[]>[], meta?: FormControlMeta);
     private iterateControls;
     private sortArray;
-    private setValue;
+    setValue(value: T[]): void;
     setTouched(touched: boolean): void;
     pushControl(control: ControlBaseInterface<T>): void;
     addControlAt(index: number, control: ControlBaseInterface<T>): void;

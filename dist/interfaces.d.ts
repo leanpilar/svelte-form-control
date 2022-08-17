@@ -24,21 +24,26 @@ export interface FormControlMeta {
     emptyControl?: any;
     [key: string]: any;
 }
+export interface ControlEventOptions {
+    propagateChanges?: boolean;
+}
 export interface ControlBaseInterface<T> {
     initial?: T;
     validators: Writable<ControlValidators<T>>;
     meta: Writable<FormControlMeta>;
     id: string;
+    currentState: ControlState<T> | null;
+    propagateChanges: boolean;
     label: string;
     value: Writable<T>;
     state: Readable<ControlState<T>>;
     child(path: string): ControlBaseInterface<T> | null;
-    reset(value?: Partial<T>): void;
-    setMeta(value?: FormControlMeta): void;
-    patchMeta(value?: Partial<FormControlMeta>): void;
-    setValue?(value: T): void;
-    patchValue?(value: Partial<T>): void;
-    setTouched(touched: boolean): void;
+    reset(value?: Partial<T>, options?: ControlEventOptions): void;
+    setMeta(value?: FormControlMeta, options?: ControlEventOptions): void;
+    patchMeta(value?: Partial<FormControlMeta>, options?: ControlEventOptions): void;
+    setValue?(value: T, options?: ControlEventOptions): void;
+    patchValue?(value: Partial<T>, options?: ControlEventOptions): void;
+    setTouched(touched: boolean, options?: ControlEventOptions): void;
     setValidators: any;
 }
 export interface $ControlState {

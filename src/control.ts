@@ -4,7 +4,7 @@ import { ValidationError, ValidatorFn } from "./validators";
 import { v4 as uuidv4 } from 'uuid';
 import {
 	$ControlState,
-	ControlBaseInterface,
+	ControlBaseInterface, ControlEventOptions,
 	ControlState,
 	ControlTypes,
 	ControlValidators,
@@ -21,6 +21,10 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 	public meta: Writable<FormControlMeta>;
 
 	public id: string = uuidv4()
+
+	public currentState: ControlState<T> | null = null
+
+	public propagateChanges: boolean = true
 
 	public label: string
 
@@ -215,6 +219,10 @@ export class ControlGroup<T> extends ControlBase<T> {
 	state = derived(
 		[this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta],
 		([value, childState, validators, touched, meta]) => {
+			if (this.propagateChanges && this.currentState !== null) {
+				return this.currentState
+			}
+			console.log('propagateState');
 			const children: Record<string, $ControlState> = {};
 			let childrenValid = true;
 			let $touched = touched;
@@ -232,8 +240,9 @@ export class ControlGroup<T> extends ControlBase<T> {
 				$pending = $pending || state.$pending;
 			}
 			const $error = validateIterated(validators, value);
+
 			const $valid = $error == null && childrenValid;
-			return {
+			let temp =  {
 				$error,
 				$valid,
 				$touched,
@@ -243,6 +252,8 @@ export class ControlGroup<T> extends ControlBase<T> {
 				$type,
 				...children,
 			} as ControlState<T>;
+			this.currentState = temp
+			return temp
 		}
 	);
 
@@ -273,16 +284,24 @@ export class ControlGroup<T> extends ControlBase<T> {
 		this.setValue({...currentValue, ...value});
 	}
 
-	addControl(key: string, control: ControlBase) {
+	addControl(key: string, control: ControlBase,options?:ControlEventOptions) {
+		if (options && options.propagateChanges === false) {
+			this.propagateChanges = false;
+		}
 		this.controlStore.update(
 			(controls) => (((<any>controls)[key] = control), controls)
 		);
+		this.propagateChanges = true;
 	}
 
-	removeControl(key: string) {
+	removeControl(key: string,options?:ControlEventOptions) {
+		if (options && options.propagateChanges === false) {
+			this.propagateChanges = false;
+		}
 		this.controlStore.update(
 			(controls) => (delete (<any>controls)[key], controls)
 		);
+		this.propagateChanges = true;
 	}
 
 	setTouched(touched: boolean) {
@@ -394,7 +413,7 @@ export class ControlArray<T> extends ControlBase<T[]> {
 		this.controlStore.set(newOrder as ControlBaseInterface<T>[]);
 
 	}
-	private setValue(value: T[]) {
+	setValue(value: T[]) {
 		this.iterateControls((control, index) => {
 			const controlValue = (value && value[index]) || null;
 			control.value.set(controlValue!);

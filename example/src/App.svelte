@@ -69,9 +69,9 @@
   const toggleAge = () => {
     ageAvailable = !form.child('age');
     if (ageAvailable) {
-      form.addControl('age', ageControl);
+      form.addControl('age', ageControl, {propagateChanges: false});
       } else {
-      form.removeControl('age');
+      form.removeControl('age',{propagateChanges: false});
     }
   };
 
