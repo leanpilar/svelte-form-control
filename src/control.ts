@@ -223,7 +223,6 @@ export class ControlGroup<T> extends ControlBase<T> {
 			if (!this.propagateChanges && this.currentState !== null) {
 				return this.currentState
 			}
-			console.log('propagateState');
 			const children: Record<string, $ControlState> = {};
 			let childrenValid = true;
 			let $touched = touched;
@@ -443,10 +442,23 @@ export class ControlArray<T> extends ControlBase<T[]> {
 
 	}
 	setValue(value: T[]) {
-		this.iterateControls((control, index) => {
-			const controlValue = (value && value[index]) || null;
-			control.value.set(controlValue!);
-		});
+		this.controlStore.set([])
+		const currentMeta = get(this.meta);
+		if (!currentMeta.emptyControl) {
+			console.error('FormControlMeta.emptyControl is required for ControlArray');
+		} else {
+			const newState = value.map(v => {
+				const control = currentMeta.emptyControl();
+				control.setValue(v);
+				return control;
+			})
+			this.controlStore.set(newState);
+		}
+
+		/*		this.iterateControls((control, index) => {
+          const controlValue = (value && value[index]) || null;
+          control.value.set(controlValue!);
+        });*/
 	}
 
 	setTouched(touched: boolean) {

@@ -100,7 +100,10 @@
 
 <div>
   <button on:click={() => form.reset($value)} disabled={!$state.$valid || !$state.$dirty}>submit</button>
-  <button on:click={() => form.reset({ labels: ['reset1'] })} disabled={!$state.$dirty}>
+  <button on:click={() => form.setValue({ labels: [
+    {label_name: 'new', label_type: 'default'},
+    {label_name: 'new', label_type: 'default'},
+  ]})}>
     reset
   </button>
   <button on:click={() => form.reset({ address: { zip: 11111 } })} disabled={!$state.$dirty}>

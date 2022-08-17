@@ -228,7 +228,6 @@ class ControlGroup extends ControlBase {
             if (!this.propagateChanges && this.currentState !== null) {
                 return this.currentState;
             }
-            console.log('propagateState');
             const children = {};
             let childrenValid = true;
             let $touched = touched;
@@ -385,10 +384,23 @@ class ControlArray extends ControlBase {
         this.controlStore.set(newOrder);
     }
     setValue(value) {
-        this.iterateControls((control, index) => {
-            const controlValue = (value && value[index]) || null;
-            control.value.set(controlValue);
-        });
+        this.controlStore.set([]);
+        const currentMeta = get(this.meta);
+        if (!currentMeta.emptyControl) {
+            console.error('FormControlMeta.emptyControl is required for ControlArray');
+        }
+        else {
+            const newState = value.map(v => {
+                const control = currentMeta.emptyControl();
+                control.setValue(v);
+                return control;
+            });
+            this.controlStore.set(newState);
+        }
+        /*		this.iterateControls((control, index) => {
+          const controlValue = (value && value[index]) || null;
+          control.value.set(controlValue!);
+        });*/
     }
     setTouched(touched) {
         this.touched.set(touched);
