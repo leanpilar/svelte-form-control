@@ -12,6 +12,8 @@ export declare abstract class ControlBase<T = any> implements ControlBaseInterfa
     abstract child(path: string): ControlBaseInterface<T> | null;
     abstract reset(value?: T): void;
     abstract setTouched(touched: boolean): void;
+    setMeta(meta: FormControlMeta): void;
+    patchMeta(meta: Partial<FormControlMeta>): void;
     setValidators(validators: ValidatorFn<T>[]): void;
 }
 export declare class Control<T = ControlTypes> extends ControlBase<T> {

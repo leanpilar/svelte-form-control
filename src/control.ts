@@ -41,6 +41,14 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 
 	abstract setTouched(touched: boolean): void;
 
+	setMeta(meta: FormControlMeta) {
+		this.meta.set(meta);
+	}
+	patchMeta(meta: Partial<FormControlMeta>) {
+		const currentMeta = get(this.meta);
+		this.meta.set({...currentMeta,...meta});
+	}
+
 	setValidators(validators: ValidatorFn<T>[]) {
 		if (!(Array.isArray(validators) && validators.length)) return;
 		this.validators.set({validators, control: this});

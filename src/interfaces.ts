@@ -37,6 +37,8 @@ export interface ControlBaseInterface<T> {
   state: Readable<ControlState<T>>;
   child(path: string): ControlBaseInterface<T> | null;
   reset(value?: T): void;
+  setMeta(value?: FormControlMeta): void;
+  patchMeta(value?: Partial<FormControlMeta>): void;
   setTouched(touched: boolean): void;
   setValidators: any;
 }

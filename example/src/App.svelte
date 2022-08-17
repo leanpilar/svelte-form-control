@@ -32,7 +32,11 @@
   ]);
 
   const form = new ControlGroup({
-
+    name: new Control('', [
+      required,
+      minLength(3),
+      maxLength(10),
+    ], {name: 'Name'}),
     labels: new ControlArray([
    /*   labelControl(),
       labelControl(),*/
@@ -90,6 +94,7 @@
 
 <CustomControl control="{form}" />
 <button on:click="{() => form.setTouched(true)}"> touch</button>
+<button on:click="{() => form.child('name').patchMeta({visible: false})}"> patchMeta</button>
 <hr>
 
 
