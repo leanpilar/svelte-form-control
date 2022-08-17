@@ -49,8 +49,8 @@ export declare class ControlGroup<T> extends ControlBase<T> {
         key: string;
         control: ControlBase;
     }[], options?: ControlEventOptions): void;
-    addControl(key: string, control: ControlBase, options?: ControlEventOptions): void;
-    removeControl(key: string, options?: ControlEventOptions): void;
+    addControl(key: keyof T, control: ControlBaseInterface<T[keyof T]>, options?: ControlEventOptions): void;
+    removeControl(key: keyof T, options?: ControlEventOptions): void;
     setTouched(touched: boolean): void;
     child(path: string): ControlBaseInterface<T> | null;
     reset(value?: Partial<T>): void;
