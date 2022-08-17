@@ -50,7 +50,7 @@ export abstract class ControlBase<T = any> {
 
 	protected meta: Writable<FormControlMeta>;
 
-	protected id: string = uuidv4()
+	public id: string = uuidv4()
 
 	protected label: string
 
@@ -409,6 +409,14 @@ export class ControlArray<T> extends ControlBase<T[]> {
 		controls.forEach(callback);
 	}
 
+	private sortArray(val: ControlBase[]) {
+		const currentControls = get(this.controlStore);
+		let newOrderIds = val.map((control) => control.id);
+		let newOrder = newOrderIds.map((id) => currentControls.find((control) => control.id === id));
+		newOrder = newOrder.filter((control) => control !== undefined) ;
+		this.controlStore.set(newOrder as ControlBase<T>[]);
+
+	}
 	private setValue(value: T[]) {
 		this.iterateControls((control, index) => {
 			const controlValue = (value && value[index]) || null;

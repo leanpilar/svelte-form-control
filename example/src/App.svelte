@@ -51,7 +51,6 @@
       placeholder: 'form group'
     });
 
-  console.log(form);
   const value = form.value;
   const state = form.state;
 

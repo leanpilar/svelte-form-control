@@ -331,6 +331,13 @@ class ControlArray extends ControlBase {
         const controls = store.get(this.controlStore);
         controls.forEach(callback);
     }
+    sortArray(val) {
+        const currentControls = store.get(this.controlStore);
+        let newOrderIds = val.map((control) => control.id);
+        let newOrder = newOrderIds.map((id) => currentControls.find((control) => control.id === id));
+        newOrder = newOrder.filter((control) => control !== undefined);
+        this.controlStore.set(newOrder);
+    }
     setValue(value) {
         this.iterateControls((control, index) => {
             const controlValue = (value && value[index]) || null;

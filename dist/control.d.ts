@@ -37,7 +37,7 @@ declare type ControlState<T = any> = T extends (infer K)[] ? $ControlState & {
 export declare abstract class ControlBase<T = any> {
     validators: Writable<ValidatorFn<T>[]>;
     protected meta: Writable<FormControlMeta>;
-    protected id: string;
+    id: string;
     protected label: string;
     constructor(validators: ValidatorFn<T>[], meta?: FormControlMeta);
     abstract value: Writable<T>;
@@ -91,6 +91,7 @@ export declare class ControlArray<T> extends ControlBase<T[]> {
     }>;
     constructor(_controls: ControlBase<T>[], validators?: ValidatorFn<T[]>[], meta?: FormControlMeta);
     private iterateControls;
+    private sortArray;
     private setValue;
     setTouched(touched: boolean): void;
     pushControl(control: ControlBase<T>): void;
