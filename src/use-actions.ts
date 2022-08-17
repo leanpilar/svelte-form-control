@@ -1,5 +1,7 @@
 import { get, Readable } from 'svelte/store';
-import { $ControlState, Control, ControlBase } from "./control";
+import {Control} from "./control";
+import {$ControlState} from "./interfaces";
+
 
 export const controlClasses = (el: HTMLElement, control: Control) => {
 	if (!(control instanceof Control)) throw new Error('must be used with a Control class');

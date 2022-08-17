@@ -1,8 +1,10 @@
+import {ControlBase} from "./control";
+
 export interface ValidationError<D = any> {
 	[name: string]: D;
 }
 
-export type ValidatorFn<T = any, D = any> = (fieldValue: T) => ValidationError<D> | null;
+export type ValidatorFn<T = any, D = any> = (fieldValue: T, control: ControlBase) => ValidationError<D> | null;
 
 type ValidatorFactory<C = unknown, T = any, D = any> = (config: C) => ValidatorFn<T, D>;
 

@@ -42,7 +42,8 @@
     }),
   },
     [
-      (value) => {
+      (value, control) => {
+        console.log({control});
         const valid =
           value.name && value.email && value.email.substr(0, value.email.indexOf('@')) === value.name;
         return valid ? null : { custom: `email username part should be the same as name` };
@@ -75,16 +76,7 @@
   //let maneMeta = form.child('name').meta
 </script>
 
-<style>
-label .label {
-  display: block;
-}
 
-fieldset {
-  border: none;
-  margin-top: 1em;
-}
-</style>
 
 <h1>Svelte form control example</h1>
 

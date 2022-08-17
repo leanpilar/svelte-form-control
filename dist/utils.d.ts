@@ -1,3 +1,4 @@
 import { ValidatorFn } from "./validators";
-export declare const chainValidators: (validators: ValidatorFn[]) => ValidatorFn;
-export declare const validateIterated: <T>(validators: ValidatorFn<T, any>[], fieldValue: T) => import("./validators").ValidationError<any> | null;
+import { ControlValidators } from "./interfaces";
+export declare const chainValidators: <T>(validators: ControlValidators<T>) => ValidatorFn;
+export declare const validateIterated: <T>(validators: ControlValidators<T>, fieldValue: T) => import("./validators").ValidationError<any> | null;

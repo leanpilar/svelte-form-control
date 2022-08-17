@@ -1,5 +1,5 @@
 <script>
-  import {ControlError} from "./index";
+  import ControlError from "./ControlError.svelte";
   import {
     controlClasses,
   } from '@leanpilar/svelte-form-control';

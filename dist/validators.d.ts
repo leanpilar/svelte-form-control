@@ -1,7 +1,8 @@
+import { ControlBase } from "./control";
 export interface ValidationError<D = any> {
     [name: string]: D;
 }
-export declare type ValidatorFn<T = any, D = any> = (fieldValue: T) => ValidationError<D> | null;
+export declare type ValidatorFn<T = any, D = any> = (fieldValue: T, control: ControlBase) => ValidationError<D> | null;
 declare type ValidatorFactory<C = unknown, T = any, D = any> = (config: C) => ValidatorFn<T, D>;
 export declare const required: ValidatorFn<string | number | boolean, boolean>;
 export declare const email: ValidatorFn<string, boolean>;
