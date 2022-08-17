@@ -308,22 +308,27 @@ export class ControlGroup<T> extends ControlBase<T> {
 
 		this.propagateChanges = true;
 	}
-	addControl(key: string, control: ControlBase,options?:ControlEventOptions) {
+	addControl(key: keyof T, control: ControlBaseInterface<T[keyof T]>,options?:ControlEventOptions) {
 		if (options && options.propagateChanges === false) {
 			this.propagateChanges = false;
 		}
 		this.controlStore.update(
-			(controls) => (((<any>controls)[key] = control), controls)
+			(controls) => (((controls)[key] = control), controls)
 		);
 		this.propagateChanges = true;
 	}
 
-	removeControl(key: string,options?:ControlEventOptions) {
+	removeControl(key: keyof T,options?:ControlEventOptions) {
 		if (options && options.propagateChanges === false) {
 			this.propagateChanges = false;
 		}
 		this.controlStore.update(
-			(controls) => (delete (<any>controls)[key], controls)
+			(controls) => {
+				if (controls[key]) {
+					delete controls[key];
+				}
+				return controls;
+			}
 		);
 		this.propagateChanges = true;
 	}

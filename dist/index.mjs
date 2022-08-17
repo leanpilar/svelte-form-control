@@ -1,2 +1,519 @@
-import{writable as t,get as e,derived as s}from"svelte/store";const r=(t,e)=>{if(!Array.isArray(t.validators))return null;for(const s of t.validators)if("function"==typeof s)try{const r=s(e,t.control);if(null!=r)return r}catch(t){console.error("validator error",s,t)}return null};var o,i=new Uint8Array(16);function n(){if(!o&&!(o="undefined"!=typeof crypto&&crypto.getRandomValues&&crypto.getRandomValues.bind(crypto)||"undefined"!=typeof msCrypto&&"function"==typeof msCrypto.getRandomValues&&msCrypto.getRandomValues.bind(msCrypto)))throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");return o(i)}var a=/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;function l(t){return"string"==typeof t&&a.test(t)}for(var h=[],c=0;c<256;++c)h.push((c+256).toString(16).substr(1));function u(t,e,s){var r=(t=t||{}).random||(t.rng||n)();if(r[6]=15&r[6]|64,r[8]=63&r[8]|128,e){s=s||0;for(var o=0;o<16;++o)e[s+o]=r[o];return e}return function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:0,s=(h[t[e+0]]+h[t[e+1]]+h[t[e+2]]+h[t[e+3]]+"-"+h[t[e+4]]+h[t[e+5]]+"-"+h[t[e+6]]+h[t[e+7]]+"-"+h[t[e+8]]+h[t[e+9]]+"-"+h[t[e+10]]+h[t[e+11]]+h[t[e+12]]+h[t[e+13]]+h[t[e+14]]+h[t[e+15]]).toLowerCase();if(!l(s))throw TypeError("Stringified UUID is invalid");return s}(r)}const d={type:"string"};class p{constructor(e,s){var r,o;this.id=u(),this.currentState=null,this.propagateChanges=!0,this.validators=t({validators:e,control:this}),this.meta=t(null!==(r=Object.assign(Object.assign({},d),s))&&void 0!==r?r:{}),this.label=null!==(o=null==s?void 0:s.name)&&void 0!==o?o:""}setMeta(t){this.meta.set(t)}patchMeta(t){const s=e(this.meta);this.meta.set(Object.assign(Object.assign({},s),t))}setValidators(t){Array.isArray(t)&&t.length&&this.validators.set({validators:t,control:this})}}class v extends p{constructor(e,o=[],i){super(o,i),this.initial=e,this.value=t(this.initial),this.touched=t(!1),this.state=s([this.value,this.touched,this.validators,this.meta],(([t,e,s,o],i)=>{const n=this.initial!==t,a=r(s,t);let l=!0,h=!1,c=o,u="control";null!=a&&a instanceof Promise?(h=!0,i({$error:null,$valid:l,$touched:e,$dirty:n,$pending:h,$meta:c,$type:u}),a.then((t=>{l=null==t,h=!1,i({$error:t,$valid:l,$touched:e,$dirty:n,$pending:h,$meta:c,$type:u})})).catch((t=>{l=!1,i({$error:{serverError:!0},$valid:l,$touched:e,$dirty:n,$pending:h,$meta:c,$type:u})}))):(l=null==a,i({$error:a,$valid:l,$touched:e,$dirty:n,$pending:h,$meta:c,$type:u}))}))}setTouched(t){this.touched.set(t)}child(){return null}reset(t){void 0!==t&&(this.initial=t),this.value.set(this.initial),this.touched.set(!1)}}const $=/^([^.[]+)\.?(.*)$/;class g extends p{constructor(o,i=[],n){super(i,n),this.controlStore=t({}),this.controls={subscribe:this.controlStore.subscribe},this.valueDerived=s(this.controlStore,((t,e)=>{const r=Object.keys(t),o=r.map((e=>t[e].value));return s(o,(t=>t.reduce(((t,e,s)=>(t[r[s]]=e,t)),{}))).subscribe(e)})),this.touched=t(!1),this.childStateDerived=s(this.controlStore,((t,e)=>{const r=Object.keys(t),o=r.map((e=>t[e].state));return s(o,(t=>t.reduce(((t,e,s)=>(t[r[s]]=e,t)),{}))).subscribe(e)})),this.value={subscribe:this.valueDerived.subscribe,set:t=>this.setValue(t),update:t=>this.setValue(t(e(this.valueDerived)))},this.state=s([this.valueDerived,this.childStateDerived,this.validators,this.touched,this.meta],(([t,e,s,o,i])=>{if(!this.propagateChanges&&null!==this.currentState)return this.currentState;console.log("propagateState");const n={};let a=!0,l=o,h=!1,c=!1,u=i;for(const t of Object.keys(e)){const s=n[t]=e[t];a=a&&s.$valid,l=l||s.$touched,h=h||s.$dirty,c=c||s.$pending}const d=r(s,t),p=null==d&&a;let v=Object.assign({$error:d,$valid:p,$touched:l,$dirty:h,$pending:c,$meta:u,$type:"group"},n);return this.currentState=v,v})),this.controlStore.set(o)}iterateControls(t){const s=e(this.controlStore);Object.entries(s).forEach(t)}setValue(t){this.iterateControls((([e,s])=>{var r;const o=null!==(r=t&&t[e])&&void 0!==r?r:null;s.value.set(o)}))}patchValue(t){const s=e(this.valueDerived);this.setValue(Object.assign(Object.assign({},s),t))}setControls(t){this.controlStore.set(t)}patchControls(t){const s=e(this.controlStore);this.setControls(Object.assign(Object.assign({},s),t))}addControls(t,e){e&&!1===e.propagateChanges&&(this.propagateChanges=!1),this.controlStore.update((e=>(t.forEach((({key:t,control:s})=>{e[t]=s})),e))),this.propagateChanges=!0}addControl(t,e,s){s&&!1===s.propagateChanges&&(this.propagateChanges=!1),this.controlStore.update((s=>(s[t]=e,s))),this.propagateChanges=!0}removeControl(t,e){e&&!1===e.propagateChanges&&(this.propagateChanges=!1),this.controlStore.update((e=>(delete e[t],e))),this.propagateChanges=!0}setTouched(t){this.iterateControls((([e,s])=>{s.setTouched(t)})),this.touched.set(t)}child(t){const[s,r,o]=t.match($)||[],i=e(this.controlStore),n=r&&i[r]||null;return n?o?n.child(o):n:null}reset(t){this.iterateControls((([e,s])=>{const r=t&&t[e]||void 0;s.reset(r)}))}}const m=/^\[(\d+)\]\.?(.*)$/;class b extends p{constructor(o,i=[],n){super(i,n),this._controls=o,this.controlStore=t(this._controls),this.touched=t(!1),this.controls={subscribe:this.controlStore.subscribe},this.valueDerived=s(this.controlStore,((t,e)=>s(t.map((t=>t.value)),(t=>t)).subscribe(e))),this.childStateDerived=s(this.controlStore,((t,e)=>s(t.map((t=>t.state)),(t=>t)).subscribe(e))),this.value={subscribe:this.valueDerived.subscribe,set:t=>this.setValue(t),update:t=>this.setValue(t(e(this.valueDerived)))},this.state=s([this.valueDerived,this.childStateDerived,this.validators,this.touched],(([t,s,o,i])=>{const n={list:[]};let a=!0;n.$touched=i;for(let t=0,e=s.length;t<e;t++){const e=s[t];n.list[t]=e,a=a&&e.$valid,n.$touched=n.$touched||e.$touched||!1,n.$dirty=n.$dirty||e.$dirty}return n.$error=r(o,t),n.$valid=null==n.$error&&a,n.$meta=e(this.meta),n.$type="array",n}))}iterateControls(t){e(this.controlStore).forEach(t)}sortArray(t){const s=e(this.controlStore);let r=t.map((t=>t.id)).map((t=>s.find((e=>e.id===t))));r=r.filter((t=>void 0!==t)),this.controlStore.set(r)}setValue(t){this.iterateControls(((e,s)=>{const r=t&&t[s]||null;e.value.set(r)}))}setTouched(t){this.touched.set(t),this.iterateControls((e=>e.setTouched(t)))}pushControl(t){this.controlStore.update((e=>(e.push(t),e)))}addControlAt(t,e){this.controlStore.update((s=>(s.splice(t,0,e),s)))}removeControlAt(t){this.controlStore.update((e=>(e.splice(t,1),e)))}removeControl(t){this.controlStore.update((e=>e.filter((e=>e!==t))))}slice(t,e){this.controlStore.update((s=>s.slice(t,e)))}child(t){const[s,r,o]=t.match(m)||[],i=e(this.controlStore),n=null!=r&&i[+r]||null;return n?o?n.child(o):n:null}reset(t){this.iterateControls(((e,s)=>{const r=t&&t[s]||null;e.reset(r)}))}}const y=(t,s)=>{if(!(s instanceof v))throw new Error("must be used with a Control class");const r=t.classList,o=s.state.subscribe((t=>{t.$error?(r.add("invalid"),r.remove("valid")):(r.add("valid"),r.remove("invalid")),t.$dirty?(r.add("dirty"),r.remove("pristine")):(r.add("pristine"),r.remove("dirty")),t.$touched?r.add("touched"):r.remove("touched")})),i=["blur","focusout"],n=()=>{e(s.state).$touched||s.setTouched(!0)};return i.forEach((e=>t.addEventListener(e,n))),{destroy(){i.forEach((e=>t.removeEventListener(e,n))),o()}}},f=t=>null==t||""==`${t}`,S=t=>""!==(null!=t&&!1!==t?`${t}`.trim():"")?null:{required:!0},C=/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/,j=t=>f(t)||C.test(t)?null:{email:!0},D=t=>e=>f(e)||null==t||`${e}`.trim().length>=t?null:{minLength:t},V=t=>e=>f(e)||null==t||`${e}`.trim().length<=t?null:{maxLength:t},O=t=>f(t)||!isNaN(+t)?null:{number:!0},A=/^\d*\.?\d+$/,E=t=>f(t)||!isNaN(+t)&&A.test(`${t}`)?null:{decimal:!0},N=/^\d+$/,w=t=>f(t)||!isNaN(+t)&&N.test(`${t}`)?null:{integer:!0},T=t=>e=>f(e)||!isNaN(+e)&&(null==t||e>=t)?null:{min:t},x=t=>e=>f(e)||!isNaN(+e)&&(null==t||e<=t)?null:{max:t},L=t=>e=>f(e)||null==t||t.test(e)?null:{pattern:`${t}`};export{v as Control,b as ControlArray,p as ControlBase,g as ControlGroup,y as controlClasses,E as decimal,j as email,w as integer,x as max,V as maxLength,T as min,D as minLength,O as number,L as pattern,S as required};
+import { writable, get, derived } from 'svelte/store';
+
+const validateIterated = (validators, fieldValue) => {
+    if (!Array.isArray(validators.validators))
+        return null;
+    for (const validator of validators.validators) {
+        if (typeof validator === "function") {
+            try {
+                const result = validator(fieldValue, validators.control);
+                if (result != null)
+                    return result;
+            }
+            catch (e) {
+                console.error(`validator error`, validator, e);
+            }
+        }
+    }
+    return null;
+};
+
+// Unique ID creation requires a high quality random # generator. In the browser we therefore
+// require the crypto API and do not support built-in fallback to lower quality random number
+// generators (like Math.random()).
+var getRandomValues;
+var rnds8 = new Uint8Array(16);
+function rng() {
+  // lazy load so that environments that need to polyfill have a chance to do so
+  if (!getRandomValues) {
+    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation. Also,
+    // find the complete implementation of crypto (msCrypto) on IE11.
+    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto) || typeof msCrypto !== 'undefined' && typeof msCrypto.getRandomValues === 'function' && msCrypto.getRandomValues.bind(msCrypto);
+
+    if (!getRandomValues) {
+      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+    }
+  }
+
+  return getRandomValues(rnds8);
+}
+
+var REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
+function validate(uuid) {
+  return typeof uuid === 'string' && REGEX.test(uuid);
+}
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+
+var byteToHex = [];
+
+for (var i = 0; i < 256; ++i) {
+  byteToHex.push((i + 0x100).toString(16).substr(1));
+}
+
+function stringify(arr) {
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  var uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase(); // Consistency check for valid UUID.  If this throws, it's likely due to one
+  // of the following:
+  // - One or more input array values don't map to a hex octet (leading to
+  // "undefined" in the uuid)
+  // - Invalid input values for the RFC `version` or `variant` fields
+
+  if (!validate(uuid)) {
+    throw TypeError('Stringified UUID is invalid');
+  }
+
+  return uuid;
+}
+
+function v4(options, buf, offset) {
+  options = options || {};
+  var rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    offset = offset || 0;
+
+    for (var i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+
+    return buf;
+  }
+
+  return stringify(rnds);
+}
+
+const defaultMeta = {
+    type: 'string'
+};
+class ControlBase {
+    constructor(validators, meta) {
+        var _a, _b;
+        this.id = v4();
+        this.currentState = null;
+        this.propagateChanges = true;
+        this.validators = writable({ validators, control: this });
+        this.meta = writable((_a = Object.assign(Object.assign({}, defaultMeta), meta)) !== null && _a !== void 0 ? _a : {});
+        this.label = (_b = meta === null || meta === void 0 ? void 0 : meta.name) !== null && _b !== void 0 ? _b : '';
+    }
+    setMeta(meta) {
+        this.meta.set(meta);
+    }
+    patchMeta(meta) {
+        const currentMeta = get(this.meta);
+        this.meta.set(Object.assign(Object.assign({}, currentMeta), meta));
+    }
+    setValidators(validators) {
+        if (!(Array.isArray(validators) && validators.length))
+            return;
+        this.validators.set({ validators, control: this });
+    }
+}
+class Control extends ControlBase {
+    constructor(initial, validators = [], meta) {
+        super(validators, meta);
+        this.initial = initial;
+        this.value = writable(this.initial);
+        this.touched = writable(false);
+        this.state = derived([this.value, this.touched, this.validators, this.meta], ([value, $touched, validators, meta], set) => {
+            const $dirty = this.initial !== value;
+            const $error = validateIterated(validators, value);
+            let $valid = true;
+            let $pending = false;
+            let $meta = meta;
+            let $type = 'control';
+            if ($error != null && $error instanceof Promise) {
+                $pending = true;
+                set({
+                    $error: null,
+                    $valid,
+                    $touched,
+                    $dirty,
+                    $pending,
+                    $meta,
+                    $type
+                });
+                $error
+                    .then((ret) => {
+                    $valid = ret == null;
+                    $pending = false;
+                    set({
+                        $error: ret,
+                        $valid,
+                        $touched,
+                        $dirty,
+                        $pending,
+                        $meta,
+                        $type
+                    });
+                })
+                    .catch((err) => {
+                    $valid = false;
+                    set({
+                        $error: {
+                            serverError: true,
+                        },
+                        $valid,
+                        $touched,
+                        $dirty,
+                        $pending,
+                        $meta,
+                        $type
+                    });
+                });
+            }
+            else {
+                $valid = $error == null;
+                set({
+                    $error,
+                    $valid,
+                    $touched,
+                    $dirty,
+                    $pending,
+                    $meta,
+                    $type
+                });
+            }
+        });
+    }
+    setTouched(touched) {
+        this.touched.set(touched);
+    }
+    child() {
+        return null;
+    }
+    reset(value) {
+        if (value !== undefined)
+            this.initial = value;
+        this.value.set(this.initial);
+        this.touched.set(false);
+    }
+}
+const objectPath = /^([^.[]+)\.?(.*)$/;
+class ControlGroup extends ControlBase {
+    constructor(controls, validators = [], meta) {
+        super(validators, meta);
+        this.controlStore = writable({});
+        this.controls = {
+            subscribe: this.controlStore.subscribe,
+        };
+        this.valueDerived = derived(this.controlStore, (controls, set) => {
+            const keys = Object.keys(controls);
+            const controlValues = keys.map((key) => controls[key].value);
+            const derivedValues = derived(controlValues, (values) => values.reduce((acc, value, index) => ((acc[keys[index]] = value), acc), {}));
+            return derivedValues.subscribe(set);
+        });
+        this.touched = writable(false);
+        this.childStateDerived = derived(this.controlStore, (controls, set) => {
+            const keys = Object.keys(controls);
+            const controlStates = keys.map((key) => controls[key].state);
+            const derivedStates = derived(controlStates, (states) => states.reduce((acc, state, index) => ((acc[keys[index]] = state), acc), {}));
+            return derivedStates.subscribe(set);
+        });
+        this.value = {
+            subscribe: this.valueDerived.subscribe,
+            set: (value) => this.setValue(value),
+            update: (updater) => this.setValue(updater(get(this.valueDerived))),
+        };
+        this.state = derived([this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta], ([value, childState, validators, touched, meta]) => {
+            if (!this.propagateChanges && this.currentState !== null) {
+                return this.currentState;
+            }
+            console.log('propagateState');
+            const children = {};
+            let childrenValid = true;
+            let $touched = touched;
+            let $dirty = false;
+            let $pending = false;
+            let $meta = meta;
+            let $type = 'group';
+            for (const key of Object.keys(childState)) {
+                const state = (children[key] = childState[key]);
+                childrenValid = childrenValid && state.$valid;
+                $touched = $touched || state.$touched;
+                $dirty = $dirty || state.$dirty;
+                $pending = $pending || state.$pending;
+            }
+            const $error = validateIterated(validators, value);
+            const $valid = $error == null && childrenValid;
+            let temp = Object.assign({ $error,
+                $valid,
+                $touched,
+                $dirty,
+                $pending,
+                $meta,
+                $type }, children);
+            this.currentState = temp;
+            return temp;
+        });
+        this.controlStore.set(controls);
+    }
+    iterateControls(callback) {
+        const controls = get(this.controlStore);
+        Object.entries(controls).forEach(callback);
+    }
+    setValue(value) {
+        this.iterateControls(([key, control]) => {
+            var _a;
+            const controlValue = (_a = (value && value[key])) !== null && _a !== void 0 ? _a : null;
+            control.value.set(controlValue);
+        });
+    }
+    patchValue(value) {
+        const currentValue = get(this.valueDerived);
+        this.setValue(Object.assign(Object.assign({}, currentValue), value));
+    }
+    setControls(controls) {
+        this.controlStore.set(controls);
+    }
+    patchControls(controls) {
+        const currentControls = get(this.controlStore);
+        this.setControls(Object.assign(Object.assign({}, currentControls), controls));
+    }
+    addControls(list, options) {
+        if (options && options.propagateChanges === false) {
+            this.propagateChanges = false;
+        }
+        this.controlStore.update((controls) => {
+            list.forEach(({ key, control }) => {
+                controls[key] = control;
+            });
+            return controls;
+        });
+        this.propagateChanges = true;
+    }
+    addControl(key, control, options) {
+        if (options && options.propagateChanges === false) {
+            this.propagateChanges = false;
+        }
+        this.controlStore.update((controls) => (((controls)[key] = control), controls));
+        this.propagateChanges = true;
+    }
+    removeControl(key, options) {
+        if (options && options.propagateChanges === false) {
+            this.propagateChanges = false;
+        }
+        this.controlStore.update((controls) => {
+            if (controls[key]) {
+                delete controls[key];
+            }
+            return controls;
+        });
+        this.propagateChanges = true;
+    }
+    setTouched(touched) {
+        this.iterateControls(([_, control]) => {
+            control.setTouched(touched);
+        });
+        this.touched.set(touched);
+    }
+    child(path) {
+        const [_, name, rest] = path.match(objectPath) || [];
+        const controls = get(this.controlStore);
+        const control = (name && controls[name]) || null;
+        if (!control)
+            return null;
+        return rest ? control.child(rest) : control;
+    }
+    reset(value) {
+        this.iterateControls(([key, control]) => {
+            const controlValue = (value && value[key]) || undefined;
+            control.reset(controlValue);
+        });
+    }
+}
+const arrayPath = /^\[(\d+)\]\.?(.*)$/;
+class ControlArray extends ControlBase {
+    constructor(_controls, validators = [], meta) {
+        super(validators, meta);
+        this._controls = _controls;
+        this.controlStore = writable(this._controls);
+        this.touched = writable(false);
+        this.controls = {
+            subscribe: this.controlStore.subscribe,
+        };
+        this.valueDerived = derived(this.controlStore, (controls, set) => {
+            const derivedValues = derived(controls.map((control) => control.value), (values) => values);
+            return derivedValues.subscribe(set);
+        });
+        this.childStateDerived = derived(this.controlStore, (controls, set) => {
+            const derivedStates = derived(controls.map((control) => control.state), (values) => values);
+            return derivedStates.subscribe(set);
+        });
+        this.value = {
+            subscribe: this.valueDerived.subscribe,
+            set: (value) => this.setValue(value),
+            update: (updater) => this.setValue(updater(get(this.valueDerived))),
+        };
+        this.state = derived([this.valueDerived, this.childStateDerived, this.validators, this.touched], ([value, childState, validators, touched]) => {
+            const arrayState = {};
+            arrayState.list = [];
+            let childrenValid = true;
+            arrayState.$touched = touched;
+            for (let i = 0, len = childState.length; i < len; i++) {
+                const state = childState[i];
+                arrayState.list[i] = state;
+                childrenValid = childrenValid && state.$valid;
+                arrayState.$touched = arrayState.$touched || state.$touched || false;
+                arrayState.$dirty = arrayState.$dirty || state.$dirty;
+            }
+            arrayState.$error = validateIterated(validators, value);
+            arrayState.$valid = arrayState.$error == null && childrenValid;
+            arrayState.$meta = get(this.meta);
+            arrayState.$type = 'array';
+            return arrayState;
+        });
+    }
+    iterateControls(callback) {
+        const controls = get(this.controlStore);
+        controls.forEach(callback);
+    }
+    sortArray(val) {
+        const currentControls = get(this.controlStore);
+        let newOrderIds = val.map((control) => control.id);
+        let newOrder = newOrderIds.map((id) => currentControls.find((control) => control.id === id));
+        newOrder = newOrder.filter((control) => control !== undefined);
+        this.controlStore.set(newOrder);
+    }
+    setValue(value) {
+        this.iterateControls((control, index) => {
+            const controlValue = (value && value[index]) || null;
+            control.value.set(controlValue);
+        });
+    }
+    setTouched(touched) {
+        this.touched.set(touched);
+        this.iterateControls((control) => control.setTouched(touched));
+    }
+    pushControl(control) {
+        this.controlStore.update((controls) => (controls.push(control), controls));
+    }
+    addControlAt(index, control) {
+        this.controlStore.update((controls) => (controls.splice(index, 0, control), controls));
+    }
+    removeControlAt(index) {
+        this.controlStore.update((controls) => (controls.splice(index, 1), controls));
+    }
+    removeControl(control) {
+        this.controlStore.update((controls) => controls.filter((c) => c !== control));
+    }
+    slice(start, end) {
+        this.controlStore.update((controls) => controls.slice(start, end));
+    }
+    //@ts-ignore
+    child(path) {
+        const [_, index, rest] = path.match(arrayPath) || [];
+        const controls = get(this.controlStore);
+        const control = (index != null && controls[+index]) || null;
+        if (!control)
+            return null;
+        return rest ? control.child(rest) : control;
+    }
+    reset(value) {
+        this.iterateControls((control, index) => {
+            const controlValue = (value && value[index]) || null;
+            control.reset(controlValue);
+        });
+    }
+}
+
+const controlClasses = (el, control) => {
+    if (!(control instanceof Control))
+        throw new Error('must be used with a Control class');
+    const classList = el.classList;
+    const stateSub = control.state.subscribe((state) => {
+        if (state.$error) {
+            classList.add('invalid');
+            classList.remove('valid');
+        }
+        else {
+            classList.add('valid');
+            classList.remove('invalid');
+        }
+        if (state.$dirty) {
+            classList.add('dirty');
+            classList.remove('pristine');
+        }
+        else {
+            classList.add('pristine');
+            classList.remove('dirty');
+        }
+        if (state.$touched) {
+            classList.add('touched');
+        }
+        else {
+            classList.remove('touched');
+        }
+    });
+    const eventNames = ['blur', 'focusout'];
+    const unregister = () => eventNames.forEach(eventName => el.removeEventListener(eventName, touchedFn));
+    const touchedFn = () => {
+        if (get(control.state).$touched)
+            return;
+        control.setTouched(true);
+    };
+    eventNames.forEach(eventName => el.addEventListener(eventName, touchedFn));
+    return {
+        destroy() {
+            unregister();
+            stateSub();
+        }
+    };
+};
+
+const empty = (value) => value == null || `${value}` === '';
+const required = value => {
+    let stringValue = value != null && value !== false ? `${value}`.trim() : '';
+    return stringValue !== '' ? null : { required: true };
+};
+const emailFormat = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+const email = email => {
+    const valid = empty(email) || emailFormat.test(email);
+    return valid ? null : { email: true };
+};
+const minLength = min => value => {
+    const valid = empty(value) || min == null || `${value}`.trim().length >= min;
+    return valid ? null : { minLength: min };
+};
+const maxLength = max => value => {
+    const valid = empty(value) || max == null || `${value}`.trim().length <= max;
+    return valid ? null : { maxLength: max };
+};
+const number = number => {
+    const valid = empty(number) || !isNaN(+number);
+    return valid ? null : { number: true };
+};
+const decimalFormat = /^\d*\.?\d+$/;
+const decimal = number => {
+    const valid = empty(number) || !isNaN(+number) && decimalFormat.test(`${number}`);
+    return valid ? null : { decimal: true };
+};
+const intFormat = /^\d+$/;
+const integer = number => {
+    const valid = empty(number) || !isNaN(+number) && intFormat.test(`${number}`);
+    return valid ? null : { integer: true };
+};
+const min = min => number => {
+    const valid = empty(number) || !isNaN(+number) && (min == null || number >= min);
+    return valid ? null : { min };
+};
+const max = max => number => {
+    const valid = empty(number) || !isNaN(+number) && (max == null || number <= max);
+    return valid ? null : { max };
+};
+const pattern = re => text => {
+    const valid = empty(text) || (re == null || re.test(text));
+    return valid ? null : { pattern: `${re}` };
+};
+
+export { Control, ControlArray, ControlBase, ControlGroup, controlClasses, decimal, email, integer, max, maxLength, min, minLength, number, pattern, required };
 //# sourceMappingURL=index.mjs.map
