@@ -39,6 +39,8 @@ export interface ControlBaseInterface<T> {
   reset(value?: T): void;
   setMeta(value?: FormControlMeta): void;
   patchMeta(value?: Partial<FormControlMeta>): void;
+  setValue?(value: T): void;
+  patchValue?(value: Partial<T>): void;
   setTouched(touched: boolean): void;
   setValidators: any;
 }

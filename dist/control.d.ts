@@ -39,8 +39,8 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     state: Readable<ControlState<T>>;
     constructor(controls: Controls<T>, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     private iterateControls;
-    private setValue;
-    private patchValue;
+    setValue(value: T): void;
+    patchValue(value: Partial<T>): void;
     addControl(key: string, control: ControlBase): void;
     removeControl(key: string): void;
     setTouched(touched: boolean): void;

@@ -261,13 +261,13 @@ export class ControlGroup<T> extends ControlBase<T> {
 		(<[K, ControlBaseInterface<T[K]>][]>Object.entries(controls)).forEach(callback);
 	}
 
-	private setValue(value: T) {
+	public setValue(value: T) {
 		this.iterateControls(([key, control]) => {
 			const controlValue = (value && value[key]) ?? null;
 			control.value.set(controlValue!);
 		});
 	}
-	private patchValue(value: T) {
+	public patchValue(value: Partial<T>) {
 		const currentValue = get(this.valueDerived);
 		this.setValue({...currentValue, ...value});
 	}
@@ -295,7 +295,7 @@ export class ControlGroup<T> extends ControlBase<T> {
 		const [_, name, rest] = path.match(objectPath) || [];
 		const controls = get(this.controlStore);
 		const control =
-			(name && ((controls as any)[name] as ControlBase)) || null;
+			(name && ((controls as any)[name] as ControlBaseInterface<T>)) || null;
 		if (!control) return null!;
 		return rest ? control.child(rest) : control;
 	}
