@@ -219,7 +219,8 @@ export class ControlGroup<T> extends ControlBase<T> {
 	state = derived(
 		[this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta],
 		([value, childState, validators, touched, meta]) => {
-			if (this.propagateChanges && this.currentState !== null) {
+
+			if (!this.propagateChanges && this.currentState !== null) {
 				return this.currentState
 			}
 			console.log('propagateState');
