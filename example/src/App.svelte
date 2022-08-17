@@ -32,7 +32,7 @@
   ]);
 
   const form = new ControlGroup({
-    name: new Control('', [
+    name: new Control('initial', [
       required,
       minLength(3),
       maxLength(10),

@@ -29,6 +29,7 @@ export interface FormControlMeta{
 }
 
 export interface ControlBaseInterface<T> {
+  initial?: T
   validators: Writable<ControlValidators<T>>;
   meta: Writable<FormControlMeta>
   id: string,
@@ -36,7 +37,7 @@ export interface ControlBaseInterface<T> {
   value: Writable<T>;
   state: Readable<ControlState<T>>;
   child(path: string): ControlBaseInterface<T> | null;
-  reset(value?: T): void;
+  reset(value?: Partial<T>): void;
   setMeta(value?: FormControlMeta): void;
   patchMeta(value?: Partial<FormControlMeta>): void;
   setValue?(value: T): void;

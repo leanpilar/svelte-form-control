@@ -57,8 +57,7 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 
 export class Control<T = ControlTypes> extends ControlBase<T> {
 	value = writable<T>(this.initial);
-	private touched = writable(false);
-
+	touched = writable(false);
 	state = derived<
 		[Writable<T>, Writable<boolean>, Writable<ControlValidators<T>>, Writable<FormControlMeta>],
 		ControlState<T>
@@ -131,7 +130,7 @@ export class Control<T = ControlTypes> extends ControlBase<T> {
 	);
 
 	constructor(
-		private initial: T,
+		public initial: T,
 		validators: ValidatorFn<T>[] = [],
 		meta?: FormControlMeta
 	) {
@@ -300,9 +299,9 @@ export class ControlGroup<T> extends ControlBase<T> {
 		return rest ? control.child(rest) : control;
 	}
 
-	reset(value?: T) {
+	reset(value?: Partial<T>) {
 		this.iterateControls(([key, control]) => {
-			const controlValue = (value && value[key]) || null;
+			const controlValue = (value && value[key]) || undefined;
 			control.reset(controlValue!);
 		});
 	}

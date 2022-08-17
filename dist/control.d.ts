@@ -17,9 +17,9 @@ export declare abstract class ControlBase<T = any> implements ControlBaseInterfa
     setValidators(validators: ValidatorFn<T>[]): void;
 }
 export declare class Control<T = ControlTypes> extends ControlBase<T> {
-    private initial;
+    initial: T;
     value: Writable<T>;
-    private touched;
+    touched: Writable<boolean>;
     state: Readable<ControlState<T>>;
     constructor(initial: T, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     setTouched(touched: boolean): void;
@@ -45,7 +45,7 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     removeControl(key: string): void;
     setTouched(touched: boolean): void;
     child(path: string): ControlBaseInterface<T> | null;
-    reset(value?: T): void;
+    reset(value?: Partial<T>): void;
 }
 export declare class ControlArray<T> extends ControlBase<T[]> {
     private readonly _controls;
