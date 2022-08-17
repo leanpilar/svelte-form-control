@@ -1,7 +1,7 @@
 import { derived, get, Readable, writable, Writable } from "svelte/store";
 import { validateIterated } from "./utils";
 import { ValidationError, ValidatorFn } from "./validators";
-
+import { v4 as uuidv4 } from 'uuid';
 type GroupValue<T> = { [K in keyof T]: T[K] };
 
 type ControlTypes = string | number | boolean;
@@ -49,6 +49,8 @@ export abstract class ControlBase<T = any> {
 	public validators: Writable<ValidatorFn<T>[]>;
 
 	protected meta: Writable<FormControlMeta>;
+
+	protected id: string = uuidv4()
 
 	protected label: string
 

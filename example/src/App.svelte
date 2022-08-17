@@ -32,41 +32,7 @@
   ]);
 
   const form = new ControlGroup({
-    name: new Control('', [
-      required,
-      minLength(4),
-      maxLength(10),
-      name => name === 'test' ? null : { expected: 'test' },
-    ], {
-      placeholder: 'custom placeholder',
-      errorMessages: {
-        required: 'Name is required'
-      }
-    }),
-    email: new Control('test@inbox.com', [
-      required,
-      email
-    ]),
-    address: new ControlGroup({
-      line: new Control('line', [
-        required,
-      ]),
-      city: new Control('city', [
-        required,
-      ]),
-      zip: new Control('1111e', [
-        required,
-        integer,
-        minLength(5),
-        maxLength(5),
 
-      ],{
-        errorMessages: {
-          required: 'Zip is required',
-          integer: 'Zip must be a number',
-        }
-      }),
-    }, [], {placeholder: 'address'}),
     labels: new ControlArray([
    /*   labelControl(),
       labelControl(),*/
@@ -85,6 +51,7 @@
       placeholder: 'form group'
     });
 
+  console.log(form);
   const value = form.value;
   const state = form.state;
 
@@ -133,63 +100,7 @@ fieldset {
 <CustomControl control="{form}" />
 <button on:click="{() => form.setTouched(true)}"> touch</button>
 <hr>
-<label>
-  <span class="label">name:</span>
-  <input placeholder="{$state?.name?.$meta?.placeholder}" bind:value={$value.name} use:controlClasses={form.child('name')} />
-  <ControlError control={form.child('name')}/>
-</label>
 
-<!--<CustomControl control="{form.child('email')}" />-->
-<label>
-  <span class="label">email:</span>
-  <input bind:value={$value.email} use:controlClasses={form.child('email')} />
-  <ControlError control={form.child('email')}/>
-</label>
-
-{#if ageAvailable}
-<label>
-  <span class="label">age:</span>
-  <input type="number" bind:value={$value.age} use:controlClasses={form.child('age')} />
-  <ControlError control={form.child('age')}/>
-</label>
-{/if}
-
-<fieldset>
-  <legend>address:</legend>
-  <label>
-    <input bind:value={$value.address.line} use:controlClasses={form.child('address.line')} />
-    <ControlError control={form.child('address.line')}/>
-  </label>
-
-  <label>
-    <span class="label">city:</span>
-    <input bind:value={$value.address.city} use:controlClasses={form.child('address.city')} />
-    <ControlError control={form.child('address.city')}/>
-  </label>
-
-  <label>
-    <span class="label">zip:</span>
-    <input  bind:value={$value.address.zip} use:controlClasses={form.child('address.zip')} />
-    <ControlError messages="{{integer: 'custom invalid integer message'}}" control={form.child('address.zip')}/>
-  </label>
-</fieldset>
-
-<fieldset>
-  <legend>labels</legend>
-<!--  {#each $labels as label, index (label)}
-    <div class="">
-      <input bind:value={$value.labels[index]} use:controlClasses={label} />
-      <button on:click={removeLabel(label)}>- remove</button>
-      <ControlError control={label}/>
-    </div>
-  {/each}-->
-  <div>
-    <button on:click={addLabel}>+ add</button>
-  </div>
-  {#if !$state.labels.$valid}
-  <div class='error'>Some label invalid</div>
-  {/if}
-</fieldset>
 
 <div>
   <button on:click={() => form.reset($value)} disabled={!$state.$valid || !$state.$dirty}>submit</button>
