@@ -17,7 +17,7 @@ export interface FormControlMeta {
     translate?: boolean;
     selectValues?: any[];
     language_dependent?: boolean;
-    type?: string;
+    type: string;
     errorMessages?: {
         [key: string]: string | (() => string);
     };

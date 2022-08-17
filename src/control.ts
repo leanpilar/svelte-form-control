@@ -11,7 +11,9 @@ import {
 	FormControlMeta
 } from "./interfaces";
 
-
+const defaultMeta:FormControlMeta = {
+	type: 'string'
+}
 
 export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 	public validators: Writable<ControlValidators<T>>;
@@ -27,7 +29,7 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 		meta?: FormControlMeta
 ) {
 		this.validators = writable({validators, control: this});
-		this.meta = writable(meta ?? {});
+		this.meta = writable({...defaultMeta,...meta} ?? {});
 		this.label = meta?.name ?? '';
 	}
 	
