@@ -41,6 +41,7 @@ export interface ControlBaseInterface<T> {
   propagateChanges: boolean
   label: string
   value: Writable<T>;
+  changedValue: Readable<Partial<T> | undefined>
   state: Readable<ControlState<T>>;
   child(path: string): ControlBaseInterface<T> | null;
   reset(value?: Partial<T>,options?:ControlEventOptions): void;

@@ -47,7 +47,6 @@
   },
     [
       (value, control) => {
-        console.log({control});
         const valid =
           value.name && value.email && value.email.substr(0, value.email.indexOf('@')) === value.name;
         return valid ? null : { custom: `email username part should be the same as name` };
@@ -58,6 +57,7 @@
 
   const value = form.value;
   const state = form.state;
+  const changedValue = form.changedValue;
 
   const labelsControl = form.child('labels');
   const labels = labelsControl.controls;
@@ -76,6 +76,7 @@
   };
 
   $: json = JSON.stringify($value, undefined, 2);
+  $: changedValueJson = JSON.stringify($changedValue, undefined, 2);
   $: stateJson = JSON.stringify($state, undefined, 2);
   //let maneMeta = form.child('name').meta
 </script>
@@ -113,6 +114,9 @@
     toggle age
   </button>
 </div>
-
+changedValue <hr>
+<pre>{changedValueJson}</pre>
+value <hr>
 <pre>{json}</pre>
+state <hr>
 <pre>{stateJson}</pre>

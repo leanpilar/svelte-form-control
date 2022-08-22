@@ -128,6 +128,11 @@ class Control extends ControlBase {
         this.initial = initial;
         this.value = store.writable(this.initial);
         this.touched = store.writable(false);
+        this.changedValue = store.derived(this.value, value => {
+            if (value === this.initial)
+                return undefined;
+            return value;
+        });
         this.state = store.derived([this.value, this.touched, this.validators, this.meta], ([value, $touched, validators, meta], set) => {
             const $dirty = this.initial !== value;
             const $error = validateIterated(validators, value);
@@ -216,17 +221,35 @@ class ControlGroup extends ControlBase {
             const derivedValues = store.derived(controlValues, (values) => values.reduce((acc, value, index) => ((acc[keys[index]] = value), acc), {}));
             return derivedValues.subscribe(set);
         });
+        this.valueChangedDerived = store.derived(this.controlStore, (controls, set) => {
+            const keys = Object.keys(controls);
+            const controlValues = keys.map((key) => controls[key].changedValue);
+            const derivedValues = store.derived(controlValues, (values) => values.reduce((acc, value, index) => ((acc[keys[index]] = value), acc), {}));
+            return derivedValues.subscribe(set);
+        });
         this.touched = store.writable(false);
         this.childStateDerived = store.derived(this.controlStore, (controls, set) => {
             const keys = Object.keys(controls);
             const controlStates = keys.map((key) => controls[key].state);
-            const derivedStates = store.derived(controlStates, (states) => states.reduce((acc, state, index) => ((acc[keys[index]] = state), acc), {}));
+            const derivedStates = store.derived(controlStates, (states) => states.reduce((acc, state, index) => {
+                if (state) {
+                    acc[keys[index]] = state;
+                }
+                return acc;
+            }, 
+            /*(
+            (acc[keys[index]] = state), acc
+        ),*/
+            {}));
             return derivedStates.subscribe(set);
         });
         this.value = {
             subscribe: this.valueDerived.subscribe,
             set: (value) => this.setValue(value),
             update: (updater) => this.setValue(updater(store.get(this.valueDerived))),
+        };
+        this.changedValue = {
+            subscribe: this.valueChangedDerived.subscribe,
         };
         this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta], ([value, childState, validators, touched, meta]) => {
             if (!this.propagateChanges && this.currentState !== null) {
@@ -239,14 +262,15 @@ class ControlGroup extends ControlBase {
             let $pending = false;
             let $meta = meta;
             let $type = 'group';
+            let $error = validateIterated(validators, value);
             for (const key of Object.keys(childState)) {
                 const state = (children[key] = childState[key]);
                 childrenValid = childrenValid && state.$valid;
                 $touched = $touched || state.$touched;
                 $dirty = $dirty || state.$dirty;
                 $pending = $pending || state.$pending;
+                $error = state.$error ? Object.assign({ [key]: $error }, state.$error) : $error;
             }
-            const $error = validateIterated(validators, value);
             const $valid = $error == null && childrenValid;
             let temp = Object.assign({ $error,
                 $valid,
@@ -345,7 +369,21 @@ class ControlArray extends ControlBase {
             subscribe: this.controlStore.subscribe,
         };
         this.valueDerived = store.derived(this.controlStore, (controls, set) => {
-            const derivedValues = store.derived(controls.map((control) => control.value), (values) => values);
+            const derivedValues = store.derived(controls
+                .map((control) => control.value), (values) => values);
+            return derivedValues.subscribe(set);
+        });
+        this.valueDerivedChanged = store.derived(this.controlStore, (controls, set) => {
+            const derivedValues = store.derived(controls
+                /*	.filter((control) => {
+                        const tempControl = get(control.changedValue );
+                        console.log({tempControl});
+                        return tempControl &&
+                            Array.isArray(tempControl) ?
+                                tempControl.length > 0 :
+                            Object.values(tempControl || {}).filter(o => o).length > 0
+                    } )*/
+                .map((control) => control.changedValue), (values) => values);
             return derivedValues.subscribe(set);
         });
         this.childStateDerived = store.derived(this.controlStore, (controls, set) => {
@@ -356,6 +394,9 @@ class ControlArray extends ControlBase {
             subscribe: this.valueDerived.subscribe,
             set: (value) => this.setValue(value),
             update: (updater) => this.setValue(updater(store.get(this.valueDerived))),
+        };
+        this.changedValue = {
+            subscribe: this.valueDerivedChanged.subscribe,
         };
         this.state = store.derived([this.valueDerived, this.childStateDerived, this.validators, this.touched], ([value, childState, validators, touched]) => {
             const arrayState = {};
@@ -375,6 +416,7 @@ class ControlArray extends ControlBase {
             arrayState.$type = 'array';
             return arrayState;
         });
+        this.initial = _controls.map(o => store.get(o.value));
     }
     iterateControls(callback) {
         const controls = store.get(this.controlStore);

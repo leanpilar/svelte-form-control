@@ -10,6 +10,7 @@ export declare abstract class ControlBase<T = any> implements ControlBaseInterfa
     label: string;
     constructor(validators: ValidatorFn<T>[], meta?: FormControlMeta);
     abstract value: Writable<T>;
+    abstract changedValue: Readable<Partial<T> | undefined>;
     abstract state: Readable<ControlState<T>>;
     abstract child(path: string): ControlBaseInterface<T> | null;
     abstract reset(value?: T): void;
@@ -22,6 +23,7 @@ export declare class Control<T = ControlTypes> extends ControlBase<T> {
     initial: T;
     value: Writable<T>;
     touched: Writable<boolean>;
+    changedValue: Readable<T | undefined>;
     state: Readable<ControlState<T>>;
     constructor(initial: T, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     setTouched(touched: boolean): void;
@@ -35,9 +37,13 @@ export declare class ControlGroup<T> extends ControlBase<T> {
     private controlStore;
     controls: Readable<Controls<T>>;
     private valueDerived;
+    private valueChangedDerived;
     private touched;
     private childStateDerived;
     value: Writable<T>;
+    changedValue: {
+        subscribe: (run: (value: T) => void, invalidate?: ((value?: T | undefined) => void) | undefined) => () => void;
+    };
     state: Readable<ControlState<T>>;
     constructor(controls: Controls<T>, validators?: ValidatorFn<T>[], meta?: FormControlMeta);
     private iterateControls;
@@ -59,10 +65,13 @@ export declare class ControlArray<T> extends ControlBase<T[]> {
     private readonly _controls;
     private controlStore;
     private touched;
+    private initial;
     controls: Readable<ControlBaseInterface<T>[]>;
     private valueDerived;
+    private valueDerivedChanged;
     private childStateDerived;
     value: Writable<T[]>;
+    changedValue: Readable<T[]>;
     state: Readable<$ControlState & {
         list: ControlState<T>[];
     }>;

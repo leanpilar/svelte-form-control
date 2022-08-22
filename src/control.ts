@@ -39,6 +39,8 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 	
 	abstract value: Writable<T>;
 
+	abstract changedValue: Readable<Partial<T> | undefined>;
+
 	abstract state: Readable<ControlState<T>>;
 
 	abstract child(path: string): ControlBaseInterface<T> | null;
@@ -64,6 +66,10 @@ export abstract class ControlBase<T = any> implements ControlBaseInterface<T> {
 export class Control<T = ControlTypes> extends ControlBase<T> {
 	value = writable<T>(this.initial);
 	touched = writable(false);
+	changedValue = derived(this.value, value => {
+			if (value === this.initial) return undefined;
+			return value;
+	})
 	state = derived<
 		[Writable<T>, Writable<boolean>, Writable<ControlValidators<T>>, Writable<FormControlMeta>],
 		ControlState<T>
@@ -188,6 +194,23 @@ export class ControlGroup<T> extends ControlBase<T> {
 			return derivedValues.subscribe(set);
 		}
 	);
+	private valueChangedDerived = derived(
+		this.controlStore,
+		(controls: Controls<T>, set: (value: T) => void) => {
+			const keys = Object.keys(controls) as Array<keyof T>;
+			const controlValues = keys.map((key) => controls[key].changedValue);
+			const derivedValues = derived(
+				controlValues as any,
+				(values) =>
+					(<any[]>values).reduce(
+						(acc, value, index) => (
+							(acc[keys[index]] = value), acc
+						),
+						{}
+					) as T
+			);
+			return derivedValues.subscribe(set);
+		})
 
 	private touched = writable(false);
 
@@ -200,9 +223,15 @@ export class ControlGroup<T> extends ControlBase<T> {
 				controlStates as any,
 				(states) =>
 					(<any[]>states).reduce(
-						(acc, state, index) => (
+						(acc, state, index) => {
+							if (state) {
+								acc[keys[index]] = state;
+							}
+							return acc
+						},
+							/*(
 							(acc[keys[index]] = state), acc
-						),
+						),*/
 						{}
 					) as ControlsState<T>
 			);
@@ -215,7 +244,9 @@ export class ControlGroup<T> extends ControlBase<T> {
 		set: (value) => this.setValue(value),
 		update: (updater) => this.setValue(updater(get(this.valueDerived))),
 	};
-
+	changedValue = {
+		subscribe: this.valueChangedDerived.subscribe,
+	}
 	state = derived(
 		[this.valueDerived, this.childStateDerived, this.validators, this.touched, this.meta],
 		([value, childState, validators, touched, meta]) => {
@@ -230,6 +261,9 @@ export class ControlGroup<T> extends ControlBase<T> {
 			let $pending = false;
 			let $meta = meta;
 			let $type = 'group';
+
+			let $error = validateIterated(validators, value);
+
 			for (const key of Object.keys(childState)) {
 				const state = (children[key] = (childState as any)[
 					key
@@ -238,8 +272,8 @@ export class ControlGroup<T> extends ControlBase<T> {
 				$touched = $touched || state.$touched;
 				$dirty = $dirty || state.$dirty;
 				$pending = $pending || state.$pending;
+				$error = state.$error ? {[key]: $error, ...state.$error} : $error;
 			}
-			const $error = validateIterated(validators, value);
 
 			const $valid = $error == null && childrenValid;
 			let temp =  {
@@ -362,6 +396,7 @@ export class ControlArray<T> extends ControlBase<T[]> {
 	private controlStore = writable(this._controls);
 
 	private touched = writable(false);
+	private initial: T[];
 
 	controls: Readable<ControlBaseInterface<T>[]> = {
 		subscribe: this.controlStore.subscribe,
@@ -371,7 +406,27 @@ export class ControlArray<T> extends ControlBase<T[]> {
 		this.controlStore,
 		(controls: ControlBaseInterface<T>[], set: (value: T[]) => void) => {
 			const derivedValues = derived(
-				controls.map((control) => control.value) as any,
+				controls
+					.map((control) => control.value) as any,
+				(values) => values as T[]
+			);
+			return derivedValues.subscribe(set);
+		}
+	);
+	private valueDerivedChanged = derived(
+		this.controlStore,
+		(controls: ControlBaseInterface<T>[], set: (value: T[]) => void) => {
+			const derivedValues = derived(
+				controls
+				/*	.filter((control) => {
+						const tempControl = get(control.changedValue );
+						console.log({tempControl});
+						return tempControl &&
+							Array.isArray(tempControl) ?
+								tempControl.length > 0 :
+							Object.values(tempControl || {}).filter(o => o).length > 0
+					} )*/
+					.map((control) => control.changedValue) as any,
 				(values) => values as T[]
 			);
 			return derivedValues.subscribe(set);
@@ -395,6 +450,9 @@ export class ControlArray<T> extends ControlBase<T[]> {
 		update: (updater) => this.setValue(updater(get(this.valueDerived))),
 	};
 
+	changedValue: Readable<T[]> = {
+		subscribe: this.valueDerivedChanged.subscribe,
+	}
 	state = derived(
 		[this.valueDerived, this.childStateDerived, this.validators, this.touched],
 		([value, childState, validators, touched]) => {
@@ -424,6 +482,7 @@ export class ControlArray<T> extends ControlBase<T[]> {
 		meta?: FormControlMeta
 	) {
 		super(validators, meta);
+		this.initial = _controls.map(o => get(o.value))
 	}
 
 	private iterateControls(
